@@ -1,5 +1,5 @@
-import dbConnect from '../lib/_db.js';
-import { getGroupModel } from '../lib/_schemas.js';
+import dbConnect from '../lib/server/_db.js';
+import { getGroupModel } from '../lib/server/_schemas.js';
 
 function formatDoc(doc) {
   if (!doc) return null;

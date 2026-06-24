@@ -1,5 +1,5 @@
-import dbConnect from '../lib/_db.js';
-import { getSettingModel, getGroupModel, getSKUModel, getOrderModel, getOrderItemModel } from '../lib/_schemas.js';
+import dbConnect from '../lib/server/_db.js';
+import { getSettingModel, getGroupModel, getSKUModel, getOrderModel, getOrderItemModel } from '../lib/server/_schemas.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
