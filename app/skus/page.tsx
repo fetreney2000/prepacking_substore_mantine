@@ -27,6 +27,7 @@ import {
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconPlus, IconEdit, IconTrash, IconSearch, IconCheck, IconX } from '@tabler/icons-react';
+import ColumnToggle from '@/components/ColumnToggle';
 
 const emptyForm = {
   kod: '',
@@ -61,6 +62,17 @@ export default function SKUsPage() {
   const [search, setSearch] = useState('');
   const [filterGroup, setFilterGroup] = useState<string | null>(null);
   const [activeOnly, setActiveOnly] = useState(false);
+
+  const [colKod, setColKod] = useState(true);
+  const [colNama, setColNama] = useState(true);
+  const [colKumpulan, setColKumpulan] = useState(true);
+  const [colStok, setColStok] = useState(true);
+  const [colAwu, setColAwu] = useState(true);
+  const [colMin, setColMin] = useState(true);
+  const [colPenimbal, setColPenimbal] = useState(true);
+  const [colMaks, setColMaks] = useState(true);
+  const [colStatus, setColStatus] = useState(true);
+  const [colAksi, setColAksi] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -191,44 +203,50 @@ export default function SKUsPage() {
       const status = determineStockStatus(sku, levels);
       return (
         <tr key={sku.id}>
-          <td>{sku.kod}</td>
-          <td>{sku.nama}</td>
-          <td>{groupName(sku.groupId)}</td>
-          <td>{formatNum(sku.stokSemasa)}</td>
-          <td>{formatNum(levels.awu)}</td>
-          <td>{formatNum(levels.min)}</td>
-          <td>{formatNum(levels.penimbal)}</td>
-          <td>{formatNum(levels.maks)}</td>
-          <td>
-            <Badge color={statusColor(status)} variant="light">
-              {statusLabel(status)}
-            </Badge>
-          </td>
-          <td>
-            <MantineGroup gap="xs" wrap="nowrap">
-              <ActionIcon
-                variant="subtle"
-                color="blue"
-                onClick={() => handleOpenModal(sku)}
-              >
-                <IconEdit size={16} />
-              </ActionIcon>
-              <ActionIcon
-                variant="subtle"
-                color="red"
-                onClick={() => {
-                  setDeletingSKU(sku);
-                  setDeleteModalOpen(true);
-                }}
-              >
-                <IconTrash size={16} />
-              </ActionIcon>
-            </MantineGroup>
-          </td>
+          {colKod && <td>{sku.kod}</td>}
+          {colNama && <td>{sku.nama}</td>}
+          {colKumpulan && <td>{groupName(sku.groupId)}</td>}
+          {colStok && <td>{formatNum(sku.stokSemasa)}</td>}
+          {colAwu && <td>{formatNum(levels.awu)}</td>}
+          {colMin && <td>{formatNum(levels.min)}</td>}
+          {colPenimbal && <td>{formatNum(levels.penimbal)}</td>}
+          {colMaks && <td>{formatNum(levels.maks)}</td>}
+          {colStatus && (
+            <td>
+              <Badge color={statusColor(status)} variant="light">
+                {statusLabel(status)}
+              </Badge>
+            </td>
+          )}
+          {colAksi && (
+            <td>
+              <MantineGroup gap="xs" wrap="nowrap">
+                <ActionIcon
+                  variant="subtle"
+                  color="blue"
+                  onClick={() => handleOpenModal(sku)}
+                >
+                  <IconEdit size={16} />
+                </ActionIcon>
+                <ActionIcon
+                  variant="subtle"
+                  color="red"
+                  onClick={() => {
+                    setDeletingSKU(sku);
+                    setDeleteModalOpen(true);
+                  }}
+                >
+                  <IconTrash size={16} />
+                </ActionIcon>
+              </MantineGroup>
+            </td>
+          )}
         </tr>
       );
     });
-  }, [filteredSKUs, settings, groups]);
+  }, [filteredSKUs, settings, groups, colKod, colNama, colKumpulan, colStok, colAwu, colMin, colPenimbal, colMaks, colStatus, colAksi]);
+
+  const visibleCount = [colKod, colNama, colKumpulan, colStok, colAwu, colMin, colPenimbal, colMaks, colStatus, colAksi].filter(Boolean).length;
 
   return (
     <Container size="xl" py="xl">
@@ -264,26 +282,41 @@ export default function SKUsPage() {
         </MantineGroup>
       </Paper>
 
+      <Box mb="md">
+        <ColumnToggle columns={[
+          { key: 'kod', label: 'Kod', visible: colKod, onChange: setColKod },
+          { key: 'nama', label: 'Nama', visible: colNama, onChange: setColNama },
+          { key: 'kumpulan', label: 'Kumpulan', visible: colKumpulan, onChange: setColKumpulan },
+          { key: 'stok', label: 'Stok', visible: colStok, onChange: setColStok },
+          { key: 'awu', label: 'AWU', visible: colAwu, onChange: setColAwu },
+          { key: 'min', label: 'Min', visible: colMin, onChange: setColMin },
+          { key: 'penimbal', label: 'Penimbal', visible: colPenimbal, onChange: setColPenimbal },
+          { key: 'maks', label: 'Maks', visible: colMaks, onChange: setColMaks },
+          { key: 'status', label: 'Status', visible: colStatus, onChange: setColStatus },
+          { key: 'aksi', label: 'Aksi', visible: colAksi, onChange: setColAksi },
+        ]} />
+      </Box>
+
       <Box style={{ overflowX: 'auto' }}>
-        <Table striped highlightOnHover>
+        <Table striped highlightOnHover style={{ minWidth: '1024px' }}>
           <thead>
             <tr>
-              <th>Kod</th>
-              <th>Nama</th>
-              <th>Kumpulan</th>
-              <th>Stok</th>
-              <th>AWU</th>
-              <th>Min</th>
-              <th>Penimbal</th>
-              <th>Maks</th>
-              <th>Status</th>
-              <th>Aksi</th>
+              {colKod && <th>Kod</th>}
+              {colNama && <th>Nama</th>}
+              {colKumpulan && <th>Kumpulan</th>}
+              {colStok && <th>Stok</th>}
+              {colAwu && <th>AWU</th>}
+              {colMin && <th>Min</th>}
+              {colPenimbal && <th>Penimbal</th>}
+              {colMaks && <th>Maks</th>}
+              {colStatus && <th>Status</th>}
+              {colAksi && <th>Aksi</th>}
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={10}>
+                <td colSpan={visibleCount}>
                   <Text ta="center" py="xl">
                     Memuatkan...
                   </Text>
@@ -291,7 +324,7 @@ export default function SKUsPage() {
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={10}>
+                <td colSpan={visibleCount}>
                   <Text ta="center" py="xl">
                     Tiada SKU ditemui
                   </Text>

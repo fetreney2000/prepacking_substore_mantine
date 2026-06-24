@@ -22,9 +22,10 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { IconSearch, IconPrinter, IconEdit, IconTrash, IconPlus } from '@tabler/icons-react';
 import { api } from '@/lib/api';
-import { calculateOrderQty } from '@/lib/calculations';
+import { calculateOrderQty, calculateAWU } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { SKU, Order, OrderItem } from '@/lib/types';
+import ColumnToggle from '@/components/ColumnToggle';
 
 interface EditItem {
   skuId: number | null;
@@ -137,6 +138,18 @@ export default function EditOrderPage() {
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingOrder, setDeletingOrder] = useState<Order | null>(null);
+
+  const [colId, setColId] = useState(true);
+  const [colTarikh, setColTarikh] = useState(true);
+  const [colPembuat, setColPembuat] = useState(true);
+  const [colTempoh, setColTempoh] = useState(true);
+  const [colItem, setColItem] = useState(true);
+  const [colAksi, setColAksi] = useState(true);
+
+  const [colItemNama, setColItemNama] = useState(true);
+  const [colItemStok, setColItemStok] = useState(true);
+  const [colItemAwu, setColItemAwu] = useState(true);
+  const [colItemNota, setColItemNota] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -323,6 +336,16 @@ export default function EditOrderPage() {
     );
   }
 
+  const ordersVisibleCount = [colId, colTarikh, colPembuat, colTempoh, colItem, colAksi].filter(Boolean).length;
+
+  const getSkuDetails = (skuId: number | null) => {
+    if (!skuId) return null;
+    const sku = skus.find((s) => s.id === skuId);
+    if (!sku) return null;
+    const levels = calculateAWU(sku);
+    return { nama: sku.nama, stok: sku.stokSemasa, awu: Math.round(levels) };
+  };
+
   return (
     <Stack gap="lg">
       <Title order={2}>Edit / Urus Pesanan</Title>
@@ -337,22 +360,32 @@ export default function EditOrderPage() {
       </Paper>
 
       <Paper withBorder p="md">
+        <Box mb="md">
+          <ColumnToggle columns={[
+            { key: 'id', label: 'ID', visible: colId, onChange: setColId },
+            { key: 'tarikh', label: 'Tarikh', visible: colTarikh, onChange: setColTarikh },
+            { key: 'pembuat', label: 'Pembuat', visible: colPembuat, onChange: setColPembuat },
+            { key: 'tempoh', label: 'Tempoh', visible: colTempoh, onChange: setColTempoh },
+            { key: 'item', label: 'Item', visible: colItem, onChange: setColItem },
+            { key: 'aksi', label: 'Aksi', visible: colAksi, onChange: setColAksi },
+          ]} />
+        </Box>
         <Box style={{ overflowX: 'auto' }}>
           <Table striped highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>ID</Table.Th>
-                <Table.Th>Tarikh</Table.Th>
-                <Table.Th>Pembuat</Table.Th>
-                <Table.Th>Tempoh</Table.Th>
-                <Table.Th ta="right">Item</Table.Th>
-                <Table.Th>Aksi</Table.Th>
+                {colId && <Table.Th>ID</Table.Th>}
+                {colTarikh && <Table.Th>Tarikh</Table.Th>}
+                {colPembuat && <Table.Th>Pembuat</Table.Th>}
+                {colTempoh && <Table.Th>Tempoh</Table.Th>}
+                {colItem && <Table.Th ta="right">Item</Table.Th>}
+                {colAksi && <Table.Th>Aksi</Table.Th>}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {filteredOrders.length === 0 ? (
                 <Table.Tr>
-                  <Table.Td colSpan={6}>
+                  <Table.Td colSpan={ordersVisibleCount}>
                     <Text ta="center" c="dimmed" py="xl">
                       Tiada pesanan ditemui
                     </Text>
@@ -361,42 +394,44 @@ export default function EditOrderPage() {
               ) : (
                 filteredOrders.map((order) => (
                   <Table.Tr key={order.id}>
-                    <Table.Td>{order.id}</Table.Td>
-                    <Table.Td>{order.tarikh}</Table.Td>
-                    <Table.Td>{order.namaPembuat}</Table.Td>
-                    <Table.Td>{order.tempohMinggu} minggu</Table.Td>
-                    <Table.Td ta="right">{formatNum(order.itemCount ?? 0)}</Table.Td>
-                    <Table.Td>
-                       <Group gap="xs" wrap="nowrap">
-                        <ActionIcon
-                          variant="subtle"
-                          color="blue"
-                          onClick={() => handlePrint(order)}
-                          title="Cetak"
-                        >
-                          <IconPrinter size={16} />
-                        </ActionIcon>
-                        <ActionIcon
-                          variant="subtle"
-                          color="yellow"
-                          onClick={() => handleOpenEdit(order)}
-                          title="Edit"
-                        >
-                          <IconEdit size={16} />
-                        </ActionIcon>
-                        <ActionIcon
-                          variant="subtle"
-                          color="red"
-                          onClick={() => {
-                            setDeletingOrder(order);
-                            setDeleteModalOpen(true);
-                          }}
-                          title="Padam"
-                        >
-                          <IconTrash size={16} />
-                        </ActionIcon>
-                      </Group>
-                    </Table.Td>
+                    {colId && <Table.Td>{order.id}</Table.Td>}
+                    {colTarikh && <Table.Td>{order.tarikh}</Table.Td>}
+                    {colPembuat && <Table.Td>{order.namaPembuat}</Table.Td>}
+                    {colTempoh && <Table.Td>{order.tempohMinggu} minggu</Table.Td>}
+                    {colItem && <Table.Td ta="right">{formatNum(order.itemCount ?? 0)}</Table.Td>}
+                    {colAksi && (
+                      <Table.Td>
+                        <Group gap="xs" wrap="nowrap">
+                          <ActionIcon
+                            variant="subtle"
+                            color="blue"
+                            onClick={() => handlePrint(order)}
+                            title="Cetak"
+                          >
+                            <IconPrinter size={16} />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant="subtle"
+                            color="yellow"
+                            onClick={() => handleOpenEdit(order)}
+                            title="Edit"
+                          >
+                            <IconEdit size={16} />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            onClick={() => {
+                              setDeletingOrder(order);
+                              setDeleteModalOpen(true);
+                            }}
+                            title="Padam"
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                        </Group>
+                      </Table.Td>
+                    )}
                   </Table.Tr>
                 ))
               )}
@@ -457,52 +492,93 @@ export default function EditOrderPage() {
             </Button>
           </Group>
 
-          {editItems.length === 0 && (
+          {editItems.length === 0 ? (
             <Text c="dimmed" size="sm" ta="center" py="md">
               Tiada item. Klik &quot;Tambah Item&quot; untuk menambah.
             </Text>
+          ) : (
+            <>
+              <ColumnToggle columns={[
+                { key: 'nama', label: 'Nama', visible: colItemNama, onChange: setColItemNama },
+                { key: 'stok', label: 'Stok', visible: colItemStok, onChange: setColItemStok },
+                { key: 'awu', label: 'AWU', visible: colItemAwu, onChange: setColItemAwu },
+                { key: 'nota', label: 'Nota', visible: colItemNota, onChange: setColItemNota },
+              ]} />
+              <Box style={{ overflowX: 'auto' }}>
+                <Table striped highlightOnHover verticalSpacing="sm">
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>SKU</Table.Th>
+                      {colItemNama && <Table.Th>Nama</Table.Th>}
+                      {colItemStok && <Table.Th ta="right">Stok</Table.Th>}
+                      {colItemAwu && <Table.Th ta="right">AWU</Table.Th>}
+                      <Table.Th ta="right">Kuantiti</Table.Th>
+                      {colItemNota && <Table.Th>Nota</Table.Th>}
+                      <Table.Th></Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {editItems.map((item, idx) => {
+                      const details = getSkuDetails(item.skuId);
+                      return (
+                        <Table.Tr key={idx}>
+                          <Table.Td>
+                            <Select
+                              placeholder="Pilih SKU"
+                              data={skuOptions}
+                              value={item.skuId !== null ? String(item.skuId) : null}
+                              onChange={(val) => handleItemSkuChange(idx, val)}
+                              searchable
+                              clearable
+                              size="xs"
+                            />
+                          </Table.Td>
+                          {colItemNama && (
+                            <Table.Td>{details?.nama || '-'}</Table.Td>
+                          )}
+                          {colItemStok && (
+                            <Table.Td ta="right">{details ? formatNum(details.stok) : '-'}</Table.Td>
+                          )}
+                          {colItemAwu && (
+                            <Table.Td ta="right">{details ? formatNum(details.awu) : '-'}</Table.Td>
+                          )}
+                          <Table.Td ta="right">
+                            <NumberInput
+                              value={item.qtyOrdered}
+                              onChange={(val) => handleItemQtyChange(idx, val ?? 0)}
+                              min={0}
+                              size="xs"
+                              maw={100}
+                            />
+                          </Table.Td>
+                          {colItemNota && (
+                            <Table.Td>
+                              <TextInput
+                                placeholder="Nota item"
+                                value={item.notes}
+                                onChange={(e) => handleItemNotesChange(idx, e.currentTarget.value)}
+                                size="xs"
+                              />
+                            </Table.Td>
+                          )}
+                          <Table.Td>
+                            <ActionIcon
+                              color="red"
+                              variant="subtle"
+                              onClick={() => handleRemoveItem(idx)}
+                              title="Padam item"
+                            >
+                              <IconTrash size={16} />
+                            </ActionIcon>
+                          </Table.Td>
+                        </Table.Tr>
+                      );
+                    })}
+                  </Table.Tbody>
+                </Table>
+              </Box>
+            </>
           )}
-
-          {editItems.map((item, idx) => (
-            <Paper key={idx} withBorder p="sm">
-              <Group grow align="flex-end" gap="sm">
-                <Select
-                  label="SKU"
-                  placeholder="Pilih SKU"
-                  data={skuOptions}
-                  value={item.skuId !== null ? String(item.skuId) : null}
-                  onChange={(val) => handleItemSkuChange(idx, val)}
-                  searchable
-                  clearable
-                  size="xs"
-                />
-                <NumberInput
-                  label="Kuantiti"
-                  value={item.qtyOrdered}
-                  onChange={(val) => handleItemQtyChange(idx, val ?? 0)}
-                  min={0}
-                  size="xs"
-                  maw={120}
-                />
-                <TextInput
-                  label="Nota"
-                  placeholder="Nota item"
-                  value={item.notes}
-                  onChange={(e) => handleItemNotesChange(idx, e.currentTarget.value)}
-                  size="xs"
-                />
-                <ActionIcon
-                  color="red"
-                  variant="subtle"
-                  onClick={() => handleRemoveItem(idx)}
-                  title="Padam item"
-                  mt="auto"
-                >
-                  <IconTrash size={16} />
-                </ActionIcon>
-              </Group>
-            </Paper>
-          ))}
 
           <Divider />
 

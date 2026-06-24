@@ -16,9 +16,11 @@ import {
   Badge,
   Text,
   Stack,
+  Box,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
+import ColumnToggle from '@/components/ColumnToggle';
 
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -31,6 +33,12 @@ export default function GroupsPage() {
   const [name, setName] = useState('');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const [colId, setColId] = useState(true);
+  const [colNama, setColNama] = useState(true);
+  const [colNota, setColNota] = useState(true);
+  const [colSku, setColSku] = useState(true);
+  const [colAksi, setColAksi] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -144,35 +152,41 @@ export default function GroupsPage() {
     }
   };
 
+  const visibleCount = [colId, colNama, colNota, colSku, colAksi].filter(Boolean).length;
+
   const rows = groups.map((group) => (
     <tr key={group.id}>
-      <td>{group.id}</td>
-      <td>{group.name}</td>
-      <td>{group.notes || '-'}</td>
-      <td>
-        <Badge variant="light">{getSKUCount(group.id)}</Badge>
-      </td>
-      <td>
-        <MantineGroup gap="xs">
-          <ActionIcon
-            variant="subtle"
-            color="blue"
-            onClick={() => handleOpenModal(group)}
-          >
-            <IconEdit size={16} />
-          </ActionIcon>
-          <ActionIcon
-            variant="subtle"
-            color="red"
-            onClick={() => {
-              setDeletingGroup(group);
-              setDeleteModalOpen(true);
-            }}
-          >
-            <IconTrash size={16} />
-          </ActionIcon>
-        </MantineGroup>
-      </td>
+      {colId && <td>{group.id}</td>}
+      {colNama && <td>{group.name}</td>}
+      {colNota && <td>{group.notes || '-'}</td>}
+      {colSku && (
+        <td>
+          <Badge variant="light">{getSKUCount(group.id)}</Badge>
+        </td>
+      )}
+      {colAksi && (
+        <td>
+          <MantineGroup gap="xs">
+            <ActionIcon
+              variant="subtle"
+              color="blue"
+              onClick={() => handleOpenModal(group)}
+            >
+              <IconEdit size={16} />
+            </ActionIcon>
+            <ActionIcon
+              variant="subtle"
+              color="red"
+              onClick={() => {
+                setDeletingGroup(group);
+                setDeleteModalOpen(true);
+              }}
+            >
+              <IconTrash size={16} />
+            </ActionIcon>
+          </MantineGroup>
+        </td>
+      )}
     </tr>
   ));
 
@@ -188,38 +202,50 @@ export default function GroupsPage() {
         </Button>
       </MantineGroup>
 
-      <Table striped highlightOnHover>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nama</th>
-            <th>Nota</th>
-            <th>SKU</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
+      <Box mb="md">
+        <ColumnToggle columns={[
+          { key: 'id', label: 'ID', visible: colId, onChange: setColId },
+          { key: 'nama', label: 'Nama', visible: colNama, onChange: setColNama },
+          { key: 'nota', label: 'Nota', visible: colNota, onChange: setColNota },
+          { key: 'sku', label: 'SKU', visible: colSku, onChange: setColSku },
+          { key: 'aksi', label: 'Aksi', visible: colAksi, onChange: setColAksi },
+        ]} />
+      </Box>
+
+      <Box style={{ overflowX: 'auto' }}>
+        <Table striped highlightOnHover>
+          <thead>
             <tr>
-              <td colSpan={5}>
-                <Text ta="center" py="xl">
-                  Memuatkan...
-                </Text>
-              </td>
+              {colId && <th>ID</th>}
+              {colNama && <th>Nama</th>}
+              {colNota && <th>Nota</th>}
+              {colSku && <th>SKU</th>}
+              {colAksi && <th>Aksi</th>}
             </tr>
-          ) : rows.length === 0 ? (
-            <tr>
-              <td colSpan={5}>
-                <Text ta="center" py="xl">
-                  Tiada kumpulan ditemui
-                </Text>
-              </td>
-            </tr>
-          ) : (
-            rows
-          )}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={visibleCount}>
+                  <Text ta="center" py="xl">
+                    Memuatkan...
+                  </Text>
+                </td>
+              </tr>
+            ) : rows.length === 0 ? (
+              <tr>
+                <td colSpan={visibleCount}>
+                  <Text ta="center" py="xl">
+                    Tiada kumpulan ditemui
+                  </Text>
+                </td>
+              </tr>
+            ) : (
+              rows
+            )}
+          </tbody>
+        </Table>
+      </Box>
 
       <Modal
         opened={modalOpen}

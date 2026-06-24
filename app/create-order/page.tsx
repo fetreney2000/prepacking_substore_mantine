@@ -21,6 +21,7 @@ import { api } from '@/lib/api';
 import { calculateAWU, calculateOrderQty } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { SKU } from '@/lib/types';
+import ColumnToggle from '@/components/ColumnToggle';
 
 interface OrderRow {
   skuId: number;
@@ -46,6 +47,12 @@ export default function CreateOrderPage() {
   const [tempohMinggu, setTempohMinggu] = useState<number>(0);
   const [nota, setNota] = useState('');
   const [rows, setRows] = useState<OrderRow[]>([]);
+
+  const [colKodNama, setColKodNama] = useState(true);
+  const [colAwu, setColAwu] = useState(true);
+  const [colStok, setColStok] = useState(true);
+  const [colKuantiti, setColKuantiti] = useState(true);
+  const [colNota, setColNota] = useState(true);
 
   useEffect(() => {
     async function load() {
@@ -178,6 +185,8 @@ export default function CreateOrderPage() {
     );
   }
 
+  const visibleCount = [colKodNama, colAwu, colStok, colKuantiti, colNota].filter(Boolean).length;
+
   return (
     <Stack gap="lg">
       <Title order={2}>Cipta Pesanan Baru</Title>
@@ -215,51 +224,67 @@ export default function CreateOrderPage() {
           Item Pesanan
         </Title>
 
+        <Box mb="md">
+          <ColumnToggle columns={[
+            { key: 'kodNama', label: 'Kod & Nama', visible: colKodNama, onChange: setColKodNama },
+            { key: 'awu', label: 'AWU', visible: colAwu, onChange: setColAwu },
+            { key: 'stok', label: 'Stok', visible: colStok, onChange: setColStok },
+            { key: 'kuantiti', label: 'Kuantiti', visible: colKuantiti, onChange: setColKuantiti },
+            { key: 'nota', label: 'Nota', visible: colNota, onChange: setColNota },
+          ]} />
+        </Box>
+
         <Box style={{ overflowX: 'auto' }}>
           <Table striped highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Kod & Nama</Table.Th>
-                <Table.Th ta="right">AWU</Table.Th>
-                <Table.Th ta="right">Stok</Table.Th>
-                <Table.Th ta="right">Kuantiti</Table.Th>
-                <Table.Th>Nota</Table.Th>
+                {colKodNama && <Table.Th>Kod & Nama</Table.Th>}
+                {colAwu && <Table.Th ta="right">AWU</Table.Th>}
+                {colStok && <Table.Th ta="right">Stok</Table.Th>}
+                {colKuantiti && <Table.Th ta="right">Kuantiti</Table.Th>}
+                {colNota && <Table.Th>Nota</Table.Th>}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {rows.map((row) => (
                 <Table.Tr key={row.skuId}>
-                  <Table.Td>
-                    <Text size="sm">
-                      <Text component="span" fw={600}>
-                        {row.kod}
+                  {colKodNama && (
+                    <Table.Td>
+                      <Text size="sm">
+                        <Text component="span" fw={600}>
+                          {row.kod}
+                        </Text>
+                        {' — '}
+                        {row.nama}
                       </Text>
-                      {' — '}
-                      {row.nama}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td ta="right">{formatNum(row.awu)}</Table.Td>
-                  <Table.Td ta="right">{formatNum(row.stok)}</Table.Td>
-                  <Table.Td ta="right">
-                    <NumberInput
-                      value={row.qty}
-                      onChange={(val) => handleQtyChange(row.skuId, val ?? 0)}
-                      min={0}
-                      step={1}
-                      size="xs"
-                      maw={100}
-                    />
-                  </Table.Td>
-                  <Table.Td>
-                    <TextInput
-                      value={row.notes}
-                      onChange={(e) =>
-                        handleNotesChange(row.skuId, e.currentTarget.value)
-                      }
-                      placeholder="Nota"
-                      size="xs"
-                    />
-                  </Table.Td>
+                    </Table.Td>
+                  )}
+                  {colAwu && <Table.Td ta="right">{formatNum(row.awu)}</Table.Td>}
+                  {colStok && <Table.Td ta="right">{formatNum(row.stok)}</Table.Td>}
+                  {colKuantiti && (
+                    <Table.Td ta="right">
+                      <NumberInput
+                        value={row.qty}
+                        onChange={(val) => handleQtyChange(row.skuId, val ?? 0)}
+                        min={0}
+                        step={1}
+                        size="xs"
+                        maw={100}
+                      />
+                    </Table.Td>
+                  )}
+                  {colNota && (
+                    <Table.Td>
+                      <TextInput
+                        value={row.notes}
+                        onChange={(e) =>
+                          handleNotesChange(row.skuId, e.currentTarget.value)
+                        }
+                        placeholder="Nota"
+                        size="xs"
+                      />
+                    </Table.Td>
+                  )}
                 </Table.Tr>
               ))}
             </Table.Tbody>

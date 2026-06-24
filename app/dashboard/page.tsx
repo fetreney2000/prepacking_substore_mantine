@@ -12,6 +12,7 @@ import {
   Paper,
   Loader,
   Center,
+  Box,
 } from '@mantine/core';
 import {
   IconPackage,
@@ -28,12 +29,20 @@ import {
 } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { SKU, Group as GroupType, Settings } from '@/lib/types';
+import ColumnToggle from '@/components/ColumnToggle';
 
 export default function DashboardPage() {
   const [skus, setSkus] = useState<SKU[]>([]);
   const [groups, setGroups] = useState<GroupType[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [colKod, setColKod] = useState(true);
+  const [colNama, setColNama] = useState(true);
+  const [colKumpulan, setColKumpulan] = useState(true);
+  const [colStokSemasa, setColStokSemasa] = useState(true);
+  const [colMin, setColMin] = useState(true);
+  const [colStatus, setColStatus] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -147,34 +156,50 @@ export default function DashboardPage() {
             Tiada item stok rendah pada masa ini.
           </Text>
         ) : (
-          <Table striped highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Kod</Table.Th>
-                <Table.Th>Nama</Table.Th>
-                <Table.Th>Kumpulan</Table.Th>
-                <Table.Th>Stok Semasa</Table.Th>
-                <Table.Th>Min</Table.Th>
-                <Table.Th>Status</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {lowStockSkus.map((sku) => (
-                <Table.Tr key={sku.id}>
-                  <Table.Td><code>{sku.kod}</code></Table.Td>
-                  <Table.Td>{sku.nama}</Table.Td>
-                  <Table.Td>{sku.group?.name || '-'}</Table.Td>
-                  <Table.Td>{formatNum(sku.stokSemasa)}</Table.Td>
-                  <Table.Td>{formatNum(sku.levels.min)}</Table.Td>
-                  <Table.Td>
-                    <Badge color={statusColor(sku.status)}>
-                      {statusLabel(sku.status)}
-                    </Badge>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+          <>
+            <Box mb="md">
+              <ColumnToggle columns={[
+                { key: 'kod', label: 'Kod', visible: colKod, onChange: setColKod },
+                { key: 'nama', label: 'Nama', visible: colNama, onChange: setColNama },
+                { key: 'kumpulan', label: 'Kumpulan', visible: colKumpulan, onChange: setColKumpulan },
+                { key: 'stokSemasa', label: 'Stok Semasa', visible: colStokSemasa, onChange: setColStokSemasa },
+                { key: 'min', label: 'Min', visible: colMin, onChange: setColMin },
+                { key: 'status', label: 'Status', visible: colStatus, onChange: setColStatus },
+              ]} />
+            </Box>
+            <Box style={{ overflowX: 'auto' }}>
+              <Table striped highlightOnHover>
+                <Table.Thead>
+                  <Table.Tr>
+                    {colKod && <Table.Th>Kod</Table.Th>}
+                    {colNama && <Table.Th>Nama</Table.Th>}
+                    {colKumpulan && <Table.Th>Kumpulan</Table.Th>}
+                    {colStokSemasa && <Table.Th>Stok Semasa</Table.Th>}
+                    {colMin && <Table.Th>Min</Table.Th>}
+                    {colStatus && <Table.Th>Status</Table.Th>}
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {lowStockSkus.map((sku) => (
+                    <Table.Tr key={sku.id}>
+                      {colKod && <Table.Td><code>{sku.kod}</code></Table.Td>}
+                      {colNama && <Table.Td>{sku.nama}</Table.Td>}
+                      {colKumpulan && <Table.Td>{sku.group?.name || '-'}</Table.Td>}
+                      {colStokSemasa && <Table.Td>{formatNum(sku.stokSemasa)}</Table.Td>}
+                      {colMin && <Table.Td>{formatNum(sku.levels.min)}</Table.Td>}
+                      {colStatus && (
+                        <Table.Td>
+                          <Badge color={statusColor(sku.status)}>
+                            {statusLabel(sku.status)}
+                          </Badge>
+                        </Table.Td>
+                      )}
+                    </Table.Tr>
+                  ))}
+                </Table.Tbody>
+              </Table>
+            </Box>
+          </>
         )}
       </Paper>
     </Stack>

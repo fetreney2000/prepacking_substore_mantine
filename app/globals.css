@@ -63,3 +63,15 @@ a {
     margin-left: 0 !important;
   }
 }
+
+/* Low resolution support (1024x768) */
+@media (max-width: 1100px) {
+  .mantine-AppShell-navbar {
+    width: 220px !important;
+  }
+}
+
+/* Ensure tables scroll horizontally on small screens */
+table {
+  min-width: 600px;
+}

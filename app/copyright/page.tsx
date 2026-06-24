@@ -18,7 +18,7 @@ export default function CopyrightPage() {
           </Avatar>
 
           <div style={{ textAlign: 'center' }}>
-            <Title order={3}>Sistem Inventori Pra-Packing</Title>
+            <Title order={3}>Sistem Inventori Farmasi</Title>
             <Text size="lg" fw={500} c="blue">
               Versi 2.0
             </Text>
