@@ -18,6 +18,7 @@ import {
   Modal,
   Select,
   ActionIcon,
+  Tooltip,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconSearch, IconPrinter, IconEdit, IconTrash, IconPlus } from '@tabler/icons-react';
@@ -348,7 +349,7 @@ export default function EditOrderPage() {
 
   return (
     <Stack gap="lg">
-      <Title order={2}>Edit / Urus Pesanan</Title>
+      <Title order={2}>Senarai Pesanan</Title>
 
       <Paper withBorder p="md">
         <TextInput
@@ -402,33 +403,36 @@ export default function EditOrderPage() {
                     {colAksi && (
                       <Table.Td>
                         <Group gap="xs" wrap="nowrap">
-                          <ActionIcon
-                            variant="subtle"
-                            color="blue"
-                            onClick={() => handlePrint(order)}
-                            title="Cetak"
-                          >
-                            <IconPrinter size={16} />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="subtle"
-                            color="yellow"
-                            onClick={() => handleOpenEdit(order)}
-                            title="Edit"
-                          >
-                            <IconEdit size={16} />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant="subtle"
-                            color="red"
-                            onClick={() => {
-                              setDeletingOrder(order);
-                              setDeleteModalOpen(true);
-                            }}
-                            title="Padam"
-                          >
-                            <IconTrash size={16} />
-                          </ActionIcon>
+                          <Tooltip label="Cetak" position="top" withArrow>
+                            <ActionIcon
+                              variant="subtle"
+                              color="blue"
+                              onClick={() => handlePrint(order)}
+                            >
+                              <IconPrinter size={16} />
+                            </ActionIcon>
+                          </Tooltip>
+                          <Tooltip label="Edit" position="top" withArrow>
+                            <ActionIcon
+                              variant="subtle"
+                              color="yellow"
+                              onClick={() => handleOpenEdit(order)}
+                            >
+                              <IconEdit size={16} />
+                            </ActionIcon>
+                          </Tooltip>
+                          <Tooltip label="Padam" position="top" withArrow>
+                            <ActionIcon
+                              variant="subtle"
+                              color="red"
+                              onClick={() => {
+                                setDeletingOrder(order);
+                                setDeleteModalOpen(true);
+                              }}
+                            >
+                              <IconTrash size={16} />
+                            </ActionIcon>
+                          </Tooltip>
                         </Group>
                       </Table.Td>
                     )}
@@ -562,14 +566,15 @@ export default function EditOrderPage() {
                             </Table.Td>
                           )}
                           <Table.Td>
-                            <ActionIcon
-                              color="red"
-                              variant="subtle"
-                              onClick={() => handleRemoveItem(idx)}
-                              title="Padam item"
-                            >
-                              <IconTrash size={16} />
-                            </ActionIcon>
+                            <Tooltip label="Padam item" position="top" withArrow>
+                              <ActionIcon
+                                color="red"
+                                variant="subtle"
+                                onClick={() => handleRemoveItem(idx)}
+                              >
+                                <IconTrash size={16} />
+                              </ActionIcon>
+                            </Tooltip>
                           </Table.Td>
                         </Table.Tr>
                       );

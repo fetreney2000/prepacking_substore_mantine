@@ -17,6 +17,7 @@ import {
   Text,
   Stack,
   Box,
+  Tooltip,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
@@ -167,23 +168,27 @@ export default function GroupsPage() {
       {colAksi && (
         <td>
           <MantineGroup gap="xs">
-            <ActionIcon
-              variant="subtle"
-              color="blue"
-              onClick={() => handleOpenModal(group)}
-            >
-              <IconEdit size={16} />
-            </ActionIcon>
-            <ActionIcon
-              variant="subtle"
-              color="red"
-              onClick={() => {
-                setDeletingGroup(group);
-                setDeleteModalOpen(true);
-              }}
-            >
-              <IconTrash size={16} />
-            </ActionIcon>
+            <Tooltip label="Edit" position="top" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="blue"
+                onClick={() => handleOpenModal(group)}
+              >
+                <IconEdit size={16} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Padam" position="top" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="red"
+                onClick={() => {
+                  setDeletingGroup(group);
+                  setDeleteModalOpen(true);
+                }}
+              >
+                <IconTrash size={16} />
+              </ActionIcon>
+            </Tooltip>
           </MantineGroup>
         </td>
       )}
@@ -193,7 +198,7 @@ export default function GroupsPage() {
   return (
     <Container size="xl" py="xl">
       <MantineGroup justify="space-between" mb="xl">
-        <Title order={2}>Kumpulan</Title>
+        <Title order={2}>Pengurusan Kumpulan</Title>
         <Button
           leftSection={<IconPlus size={16} />}
           onClick={() => handleOpenModal()}

@@ -10,17 +10,18 @@ import {
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 
 const navItems = [
   { label: 'Papan Pemuka', href: '/dashboard', icon: IconDashboard },
   { label: 'Pengurusan SKU', href: '/skus', icon: IconPackage },
-  { label: 'Kumpulan', href: '/groups', icon: IconUsers },
+  { label: 'Pengurusan Kumpulan', href: '/groups', icon: IconUsers },
   { label: 'Cipta Pesanan', href: '/create-order', icon: IconPlus },
-  { label: 'Edit Pesanan', href: '/edit-order', icon: IconClipboardList },
+  { label: 'Senarai Pesanan', href: '/edit-order', icon: IconClipboardList },
   { label: 'Laporan Pesanan', href: '/order-report', icon: IconReport },
   { label: 'Laporan SKU', href: '/sku-report', icon: IconChartBar },
   { label: 'Tetapan', href: '/settings', icon: IconSettings },
-  { label: 'Selaraskan', href: '/sync', icon: IconRefresh },
+  { label: 'Penyelarasan Data', href: '/sync', icon: IconRefresh },
   { label: 'Bantuan', href: '/help', icon: IconHelp },
   { label: 'Hak Cipta', href: '/copyright', icon: IconCopyright },
 ];
@@ -28,6 +29,7 @@ const navItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [clock, setClock] = useState('');
+  const [appTitle, setAppTitle] = useState('Sistem Inventori Farmasi');
 
   useEffect(() => {
     const update = () => {
@@ -37,6 +39,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const interval = setInterval(update, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    api.settings.get().then((settings) => {
+      setAppTitle(settings.appTitle || 'Sistem Inventori Farmasi');
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    document.title = appTitle;
+  }, [appTitle]);
 
   return (
     <AppShell
@@ -49,7 +61,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <Group h="100%" px="md" justify="space-between">
           <Group>
             <Text size="lg" fw={600} c="white" truncate maw={600}>
-              Sistem Inventori Prabungkus Hospital Keningau
+              {appTitle}
             </Text>
           </Group>
           <Text size="xs" c="rgba(255,255,255,0.8)">
@@ -92,7 +104,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <AppShell.Footer p="xs" px="md">
         <Group justify="space-between" h="100%">
           <Text size="xs" c="dimmed">{clock}</Text>
-          <Text size="xs" c="dimmed">Sistem Inventori Prabungkus v2.0</Text>
+          <Text size="xs" c="dimmed">{appTitle} v2.0</Text>
         </Group>
       </AppShell.Footer>
     </AppShell>

@@ -24,6 +24,7 @@ import {
   SimpleGrid,
   Paper,
   Box,
+  Tooltip,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconPlus, IconEdit, IconTrash, IconSearch, IconCheck, IconX } from '@tabler/icons-react';
@@ -221,23 +222,27 @@ export default function SKUsPage() {
           {colAksi && (
             <td>
               <MantineGroup gap="xs" wrap="nowrap">
-                <ActionIcon
-                  variant="subtle"
-                  color="blue"
-                  onClick={() => handleOpenModal(sku)}
-                >
-                  <IconEdit size={16} />
-                </ActionIcon>
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  onClick={() => {
-                    setDeletingSKU(sku);
-                    setDeleteModalOpen(true);
-                  }}
-                >
-                  <IconTrash size={16} />
-                </ActionIcon>
+                <Tooltip label="Edit" position="top" withArrow>
+                  <ActionIcon
+                    variant="subtle"
+                    color="blue"
+                    onClick={() => handleOpenModal(sku)}
+                  >
+                    <IconEdit size={16} />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label="Padam" position="top" withArrow>
+                  <ActionIcon
+                    variant="subtle"
+                    color="red"
+                    onClick={() => {
+                      setDeletingSKU(sku);
+                      setDeleteModalOpen(true);
+                    }}
+                  >
+                    <IconTrash size={16} />
+                  </ActionIcon>
+                </Tooltip>
               </MantineGroup>
             </td>
           )}
