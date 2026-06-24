@@ -57,21 +57,32 @@ function buildPrintHtml(
     grouped[gName].push(item);
   }
 
-  let rowsHtml = '';
-  let idx = 1;
-  for (const gName of Object.keys(grouped).sort()) {
-    rowsHtml += `<tr style="background:#e0e7ff"><td colspan="4" style="font-weight:700;padding:6px 8px">${gName}</td></tr>`;
-    for (const item of grouped[gName]) {
-      const sku = skus.find((s) => s.id === item.skuId);
-      rowsHtml += `<tr><td style="padding:5px 8px;text-align:center">${idx++}</td><td style="padding:5px 8px"><code>${item.kod}</code></td><td style="padding:5px 8px">${sku?.nama ?? '-'}</td><td style="padding:5px 8px;text-align:right;font-weight:600">${formatNum(item.qtyOrdered)}</td></tr>`;
-    }
-  }
-
   const defaultSettings: Settings = {
     id: 3, minWeeks: 2, bufferWeeks: 4, maxWeeks: 6,
     defaultFilename: '', appTitle: '', layoutMode: 'table'
   };
   const effectiveSettings = settings || defaultSettings;
+
+  let rowsHtml = '';
+  let idx = 1;
+  for (const gName of Object.keys(grouped).sort()) {
+    rowsHtml += `<tr style="background:#e0e7ff"><td colspan="9" style="font-weight:700;padding:6px 8px">${gName}</td></tr>`;
+    for (const item of grouped[gName]) {
+      const sku = skus.find((s) => s.id === item.skuId);
+      const levels = sku ? calculateLevels(sku, effectiveSettings) : { awu: 0, min: 0, penimbal: 0, maks: 0 };
+      rowsHtml += `<tr>`;
+      rowsHtml += `<td style="padding:5px 8px;text-align:center">${idx++}</td>`;
+      rowsHtml += `<td class="pc-kod" style="padding:5px 8px"><code>${item.kod}</code></td>`;
+      rowsHtml += `<td class="pc-nama" style="padding:5px 8px">${sku?.nama ?? '-'}</td>`;
+      rowsHtml += `<td class="pc-stok" style="padding:5px 8px;text-align:right">${formatNum(sku?.stokSemasa || 0)}</td>`;
+      rowsHtml += `<td class="pc-awu" style="padding:5px 8px;text-align:right">${levels.awu}</td>`;
+      rowsHtml += `<td class="pc-min" style="padding:5px 8px;text-align:right">${formatNum(levels.min)}</td>`;
+      rowsHtml += `<td class="pc-penimbal" style="padding:5px 8px;text-align:right">${formatNum(levels.penimbal)}</td>`;
+      rowsHtml += `<td class="pc-maks" style="padding:5px 8px;text-align:right">${formatNum(levels.maks)}</td>`;
+      rowsHtml += `<td style="padding:5px 8px;text-align:right;font-weight:600">${formatNum(item.qtyOrdered)}</td>`;
+      rowsHtml += `</tr>`;
+    }
+  }
 
   const orderedSkuIds = new Set<number>();
   for (const item of items) {
@@ -92,30 +103,45 @@ function buildPrintHtml(
     }
 
     notOrderedHtml += `<div style="margin-top:24px;page-break-before:always">`;
-    notOrderedHtml += `<h3 style="font-size:12pt;color:#1E3A8A;margin-bottom:8px;border-bottom:2px solid #2563EB;padding-bottom:4px;background:#1E3A8A;color:#fff;padding:8px 12px;border-radius:4px 4px 0 0">Item Yang Tidak Dipesan (${notOrderedSkus.length} item)</h3>`;
+    notOrderedHtml += `<h3 style="font-size:12pt;margin-bottom:8px;border-bottom:2px solid #2563EB;padding-bottom:4px;background:#1E3A8A;color:#fff;padding:8px 12px;border-radius:4px 4px 0 0">Item Yang Tidak Dipesan (${notOrderedSkus.length} item)</h3>`;
     notOrderedHtml += `<table style="margin-top:0">`;
-    notOrderedHtml += `<thead><tr><th>Kod</th><th>Nama</th><th>Kumpulan</th><th>Stok Semasa</th><th>AWU</th><th>Status</th></tr></thead>`;
+    notOrderedHtml += `<thead><tr><th class="pc-kod">Kod</th><th class="pc-nama">Nama</th><th class="pc-kumpulan">Kumpulan</th><th class="pc-stok">Stok Semasa</th><th class="pc-awu">AWU</th><th class="pc-min">Min</th><th class="pc-penimbal">Penimbal</th><th class="pc-maks">Maks</th><th class="pc-status">Status</th></tr></thead>`;
     notOrderedHtml += `<tbody>`;
 
     for (const gName of Object.keys(notOrderedGrouped).sort()) {
-      notOrderedHtml += `<tr style="background:#e0e7ff"><td colspan="6" style="font-weight:700;padding:6px 12px">${gName}</td></tr>`;
+      notOrderedHtml += `<tr style="background:#e0e7ff"><td colspan="9" style="font-weight:700;padding:6px 12px">${gName}</td></tr>`;
       for (const sku of notOrderedGrouped[gName]) {
         const levels = calculateLevels(sku, effectiveSettings);
         const status = determineStockStatus(sku, levels);
         const statusText = statusLabel(status);
         notOrderedHtml += `<tr>`;
-        notOrderedHtml += `<td style="padding:5px 8px"><code>${sku.kod}</code></td>`;
-        notOrderedHtml += `<td style="padding:5px 8px">${sku.nama}</td>`;
-        notOrderedHtml += `<td style="padding:5px 8px">${groupNameFromId(groups, sku.groupId)}</td>`;
-        notOrderedHtml += `<td style="padding:5px 8px;text-align:right">${formatNum(sku.stokSemasa || 0)}</td>`;
-        notOrderedHtml += `<td style="padding:5px 8px;text-align:right">${levels.awu}</td>`;
-        notOrderedHtml += `<td style="padding:5px 8px">${statusText}</td>`;
+        notOrderedHtml += `<td class="pc-kod" style="padding:5px 8px"><code>${sku.kod}</code></td>`;
+        notOrderedHtml += `<td class="pc-nama" style="padding:5px 8px">${sku.nama}</td>`;
+        notOrderedHtml += `<td class="pc-kumpulan" style="padding:5px 8px">${groupNameFromId(groups, sku.groupId)}</td>`;
+        notOrderedHtml += `<td class="pc-stok" style="padding:5px 8px;text-align:right">${formatNum(sku.stokSemasa || 0)}</td>`;
+        notOrderedHtml += `<td class="pc-awu" style="padding:5px 8px;text-align:right">${levels.awu}</td>`;
+        notOrderedHtml += `<td class="pc-min" style="padding:5px 8px;text-align:right">${formatNum(levels.min)}</td>`;
+        notOrderedHtml += `<td class="pc-penimbal" style="padding:5px 8px;text-align:right">${formatNum(levels.penimbal)}</td>`;
+        notOrderedHtml += `<td class="pc-maks" style="padding:5px 8px;text-align:right">${formatNum(levels.maks)}</td>`;
+        notOrderedHtml += `<td class="pc-status" style="padding:5px 8px">${statusText}</td>`;
         notOrderedHtml += `</tr>`;
       }
     }
 
     notOrderedHtml += `</tbody></table></div>`;
   }
+
+  const toggleStyle = `.col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.col-toggle-bar label{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;font-size:11px;cursor:pointer;user-select:none}.col-toggle-bar input{display:none}.toggle-slider{width:28px;height:16px;background:#cbd5e1;border-radius:8px;position:relative;transition:background .2s;flex-shrink:0;display:inline-block}.toggle-slider::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}.col-toggle-bar input:checked+.toggle-slider{background:#2563eb}.col-toggle-bar input:checked+.toggle-slider::after{transform:translateX(12px)}.col-toggle-bar .toggle-label{font-size:11px;color:#333}@media print{.col-toggle-bar{display:none!important}.col-hidden,.col-hidden *{display:none!important}}`;
+
+  const colToggleBar = `
+    <div class="col-toggle-bar">
+      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-kod').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kod</span></label>
+      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-nama').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nama</span></label>
+      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-stok').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Stok</span></label>
+      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-awu').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">AWU</span></label>
+      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
+      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-kumpulan').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-status').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kumpulan/Status</span></label>
+    </div>`;
 
   return `<!DOCTYPE html>
 <html lang="ms">
@@ -141,6 +167,7 @@ function buildPrintHtml(
   .btn-print:hover{background:#1d4ed8}
   .btn-close{background:#e5e7eb;color:#374151}
   .btn-close:hover{background:#d1d5db}
+  ${toggleStyle}
   @media print{.print-actions{display:none!important}body{padding:16px}}
 </style>
 </head>
@@ -156,8 +183,9 @@ function buildPrintHtml(
     <strong>Tempoh:</strong> ${order.tempohMinggu} minggu
     ${order.notes ? `<br><strong>Nota:</strong> ${order.notes}` : ''}
   </div>
+  ${colToggleBar}
   <table>
-    <thead><tr><th style="width:40px">#</th><th>Kod</th><th>Nama</th><th style="width:80px;text-align:right">Kuantiti</th></tr></thead>
+    <thead><tr><th style="width:30px">#</th><th class="pc-kod">Kod</th><th class="pc-nama">Nama</th><th class="pc-stok" style="text-align:right">Stok</th><th class="pc-awu" style="text-align:right">AWU</th><th class="pc-min" style="text-align:right">Min</th><th class="pc-penimbal" style="text-align:right">Penimbal</th><th class="pc-maks" style="text-align:right">Maks</th><th style="text-align:right">Kuantiti</th></tr></thead>
     <tbody>${rowsHtml}</tbody>
   </table>
   ${notOrderedHtml}

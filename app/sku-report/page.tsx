@@ -124,7 +124,7 @@ export default function SKUReportPage() {
   }, []);
 
   const handlePrint = useCallback(() => {
-    const colCount = 2 + (showKumpulan ? 1 : 0) + 1 + 1 + (showMin ? 1 : 0) + (showPenimbal ? 1 : 0) + (showMaks ? 1 : 0) + 1 + 1;
+    const colCount = 10;
 
     const visibleHeaders = [
       'Kod',
@@ -175,25 +175,27 @@ export default function SKUReportPage() {
         rowsHtml += '<tr>';
         rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;">${row.sku.kod}</td>`;
         rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;">${row.sku.nama}</td>`;
-        if (showKumpulan) {
-          rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;">${row.groupName}</td>`;
-        }
+        rowsHtml += `<td class="sr-kumpulan" style="padding:6px 12px;border:1px solid #d9e1ec;">${row.groupName}</td>`;
         rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.sku.stokSemasa)}</td>`;
         rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.awu)}</td>`;
-        if (showMin) {
-          rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.min)}</td>`;
-        }
-        if (showPenimbal) {
-          rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.penimbal)}</td>`;
-        }
-        if (showMaks) {
-          rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.maks)}</td>`;
-        }
-        rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${row.mingguStok !== null ? row.mingguStok.toFixed(2) : '-'}</td>`;
-        rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;"><span style="background:${statusBadgeBg};color:${statusBadgeColor};padding:2px 8px;border-radius:4px;font-size:12px;">${statusLabel(row.status)}</span></td>`;
+        rowsHtml += `<td class="sr-min" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.min)}</td>`;
+        rowsHtml += `<td class="sr-penimbal" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.penimbal)}</td>`;
+        rowsHtml += `<td class="sr-maks" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.maks)}</td>`;
+        rowsHtml += `<td class="sr-minggu" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${row.mingguStok !== null ? row.mingguStok.toFixed(2) : '-'}</td>`;
+        rowsHtml += `<td class="sr-status" style="padding:6px 12px;border:1px solid #d9e1ec;"><span style="background:${statusBadgeBg};color:${statusBadgeColor};padding:2px 8px;border-radius:4px;font-size:12px;">${statusLabel(row.status)}</span></td>`;
         rowsHtml += '</tr>';
       });
     });
+
+    const toggleStyle = `.col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.col-toggle-bar label{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;font-size:11px;cursor:pointer;user-select:none}.col-toggle-bar input{display:none}.toggle-slider{width:28px;height:16px;background:#cbd5e1;border-radius:8px;position:relative;transition:background .2s;flex-shrink:0;display:inline-block}.toggle-slider::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}.col-toggle-bar input:checked+.toggle-slider{background:#2563eb}.col-toggle-bar input:checked+.toggle-slider::after{transform:translateX(12px)}.col-toggle-bar .toggle-label{font-size:11px;color:#333}@media print{.col-toggle-bar{display:none!important}.col-hidden,.col-hidden *{display:none!important}}`;
+
+    const colToggleBar = `
+      <div class="col-toggle-bar">
+        <label><input type="checkbox" checked onchange="document.querySelectorAll('.sr-kumpulan').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kumpulan</span></label>
+        <label><input type="checkbox" checked onchange="document.querySelectorAll('.sr-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.sr-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.sr-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
+        <label><input type="checkbox" checked onchange="document.querySelectorAll('.sr-minggu').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Minggu Stok</span></label>
+        <label><input type="checkbox" checked onchange="document.querySelectorAll('.sr-status').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Status</span></label>
+      </div>`;
 
     const html = `<!DOCTYPE html>
 <html lang="ms">
@@ -208,15 +210,28 @@ export default function SKUReportPage() {
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { background: #1e3a8a; color: #fff; padding: 8px 12px; text-align: left; border: 1px solid #152c6b; }
   .record-count { margin-top: 12px; font-size: 12px; color: #64748b; }
+  ${toggleStyle}
   @media print { body { padding: 0; } }
 </style>
 </head>
 <body>
 <h1>Laporan SKU</h1>
 <div class="meta">Dijana pada: ${dateStr}</div>
+${colToggleBar}
 <table>
 <thead>
-<tr>${visibleHeaders.map((h) => `<th>${h}</th>`).join('')}</tr>
+<tr>
+  <th>Kod</th>
+  <th>Nama</th>
+  <th class="sr-kumpulan">Kumpulan</th>
+  <th>Stok Semasa</th>
+  <th>AWU</th>
+  <th class="sr-min">Min</th>
+  <th class="sr-penimbal">Penimbal</th>
+  <th class="sr-maks">Maks</th>
+  <th class="sr-minggu">Minggu Stok</th>
+  <th class="sr-status">Status</th>
+</tr>
 </thead>
 <tbody>
 ${rowsHtml}
