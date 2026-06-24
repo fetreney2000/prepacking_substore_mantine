@@ -6,7 +6,6 @@ import {
   Paper,
   TextInput,
   NumberInput,
-  Select,
   Button,
   Stack,
   Group,
@@ -21,7 +20,6 @@ export default function SettingsPage() {
   const [bufferWeeks, setBufferWeeks] = useState<number>(1);
   const [maxWeeks, setMaxWeeks] = useState<number>(12);
   const [defaultFilename, setDefaultFilename] = useState('');
-  const [layoutMode, setLayoutMode] = useState<'table' | 'card'>('table');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -37,7 +35,6 @@ export default function SettingsPage() {
         setBufferWeeks(settings.bufferWeeks ?? 1);
         setMaxWeeks(settings.maxWeeks ?? 12);
         setDefaultFilename(settings.defaultFilename || '');
-        setLayoutMode((settings.layoutMode || 'table') as 'table' | 'card');
       }
     } catch {
       notifications.show({
@@ -57,7 +54,6 @@ export default function SettingsPage() {
         bufferWeeks,
         maxWeeks,
         defaultFilename,
-        layoutMode,
       });
       notifications.show({
         title: 'Berjaya',
@@ -123,17 +119,6 @@ export default function SettingsPage() {
             placeholder="Nama fail untuk eksport"
             value={defaultFilename}
             onChange={(e) => setDefaultFilename(e.currentTarget.value)}
-          />
-
-          <Select
-            label="Mod Aturan"
-            description="Pilih mod paparan"
-            data={[
-              { value: 'table', label: 'Jadual' },
-              { value: 'card', label: 'Kad' },
-            ]}
-            value={layoutMode}
-            onChange={(val) => setLayoutMode(val as 'table' | 'card')}
           />
 
           <Group justify="flex-end" mt="md">

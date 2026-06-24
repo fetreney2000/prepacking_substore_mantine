@@ -197,7 +197,7 @@ export default function EditOrderPage() {
   };
 
   const handleAddItem = () => {
-    setEditItems((prev) => [...prev, { skuId: null, kod: '', qtyOrdered: 0, notes: '' }]);
+    setEditItems((prev) => [{ skuId: null, kod: '', qtyOrdered: 0, notes: '' }, ...prev]);
   };
 
   const handleRemoveItem = (idx: number) => {
