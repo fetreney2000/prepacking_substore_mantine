@@ -23,9 +23,9 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { IconSearch, IconPrinter, IconEdit, IconTrash, IconPlus } from '@tabler/icons-react';
 import { api } from '@/lib/api';
-import { calculateOrderQty, calculateAWU } from '@/lib/calculations';
+import { calculateOrderQty, calculateAWU, calculateLevels, determineStockStatus, statusLabel, statusColor } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
-import { SKU, Order, OrderItem } from '@/lib/types';
+import { SKU, Order, OrderItem, Settings } from '@/lib/types';
 import ColumnToggle from '@/components/ColumnToggle';
 
 interface EditItem {
@@ -46,7 +46,8 @@ function buildPrintHtml(
   items: OrderItem[],
   skus: SKU[],
   groups: { id: number; name: string }[],
-  appTitle: string
+  appTitle: string,
+  settings: Settings | null
 ): string {
   const grouped: Record<string, OrderItem[]> = {};
   for (const item of items) {
@@ -64,6 +65,56 @@ function buildPrintHtml(
       const sku = skus.find((s) => s.id === item.skuId);
       rowsHtml += `<tr><td style="padding:5px 8px;text-align:center">${idx++}</td><td style="padding:5px 8px"><code>${item.kod}</code></td><td style="padding:5px 8px">${sku?.nama ?? '-'}</td><td style="padding:5px 8px;text-align:right;font-weight:600">${formatNum(item.qtyOrdered)}</td></tr>`;
     }
+  }
+
+  const defaultSettings: Settings = {
+    id: 3, minWeeks: 2, bufferWeeks: 4, maxWeeks: 6,
+    defaultFilename: '', appTitle: '', layoutMode: 'table'
+  };
+  const effectiveSettings = settings || defaultSettings;
+
+  const orderedSkuIds = new Set<number>();
+  for (const item of items) {
+    if (item.skuId) orderedSkuIds.add(item.skuId);
+  }
+
+  const notOrderedSkus = skus
+    .filter(s => s.enabled && !orderedSkuIds.has(s.id))
+    .sort((a, b) => (a.nama || '').localeCompare(b.nama || ''));
+
+  let notOrderedHtml = '';
+  if (notOrderedSkus.length > 0) {
+    const notOrderedGrouped: Record<string, SKU[]> = {};
+    for (const sku of notOrderedSkus) {
+      const gName = groupNameFromId(groups, sku.groupId);
+      if (!notOrderedGrouped[gName]) notOrderedGrouped[gName] = [];
+      notOrderedGrouped[gName].push(sku);
+    }
+
+    notOrderedHtml += `<div style="margin-top:24px;page-break-before:always">`;
+    notOrderedHtml += `<h3 style="font-size:12pt;color:#1E3A8A;margin-bottom:8px;border-bottom:2px solid #2563EB;padding-bottom:4px;background:#1E3A8A;color:#fff;padding:8px 12px;border-radius:4px 4px 0 0">Item Yang Tidak Dipesan (${notOrderedSkus.length} item)</h3>`;
+    notOrderedHtml += `<table style="margin-top:0">`;
+    notOrderedHtml += `<thead><tr><th>Kod</th><th>Nama</th><th>Kumpulan</th><th>Stok Semasa</th><th>AWU</th><th>Status</th></tr></thead>`;
+    notOrderedHtml += `<tbody>`;
+
+    for (const gName of Object.keys(notOrderedGrouped).sort()) {
+      notOrderedHtml += `<tr style="background:#e0e7ff"><td colspan="6" style="font-weight:700;padding:6px 12px">${gName}</td></tr>`;
+      for (const sku of notOrderedGrouped[gName]) {
+        const levels = calculateLevels(sku, effectiveSettings);
+        const status = determineStockStatus(sku, levels);
+        const statusText = statusLabel(status);
+        notOrderedHtml += `<tr>`;
+        notOrderedHtml += `<td style="padding:5px 8px"><code>${sku.kod}</code></td>`;
+        notOrderedHtml += `<td style="padding:5px 8px">${sku.nama}</td>`;
+        notOrderedHtml += `<td style="padding:5px 8px">${groupNameFromId(groups, sku.groupId)}</td>`;
+        notOrderedHtml += `<td style="padding:5px 8px;text-align:right">${formatNum(sku.stokSemasa || 0)}</td>`;
+        notOrderedHtml += `<td style="padding:5px 8px;text-align:right">${levels.awu}</td>`;
+        notOrderedHtml += `<td style="padding:5px 8px">${statusText}</td>`;
+        notOrderedHtml += `</tr>`;
+      }
+    }
+
+    notOrderedHtml += `</tbody></table></div>`;
   }
 
   return `<!DOCTYPE html>
@@ -109,6 +160,7 @@ function buildPrintHtml(
     <thead><tr><th style="width:40px">#</th><th>Kod</th><th>Nama</th><th style="width:80px;text-align:right">Kuantiti</th></tr></thead>
     <tbody>${rowsHtml}</tbody>
   </table>
+  ${notOrderedHtml}
   <div class="sig-row">
     <div class="sig-box"><p><strong>Disediakan oleh:</strong><br><small>(Pembuat Pesanan)</small></p></div>
     <div class="sig-box"><p><strong>Disahkan oleh:</strong><br><small>(Tandatangan &amp; Cop)</small></p></div>
@@ -125,6 +177,7 @@ export default function EditOrderPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [skus, setSkus] = useState<SKU[]>([]);
   const [groups, setGroups] = useState<{ id: number; name: string }[]>([]);
+  const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -154,14 +207,16 @@ export default function EditOrderPage() {
 
   const fetchData = async () => {
     try {
-      const [ordersData, skusData, groupsData] = await Promise.all([
+      const [ordersData, skusData, groupsData, settingsData] = await Promise.all([
         api.orders.list(),
         api.skus.list(),
         api.groups.list(),
+        api.settings.get(),
       ]);
       setOrders(ordersData);
       setSkus(skusData);
       setGroups(groupsData);
+      setSettings(settingsData);
     } catch {
       showNotification({ title: 'Ralat', message: 'Gagal memuatkan data pesanan', color: 'red' });
     } finally {
@@ -316,7 +371,7 @@ export default function EditOrderPage() {
     try {
       const fullOrder = await api.orders.get(order.id);
       const items = fullOrder.items || [];
-      const html = buildPrintHtml(fullOrder, items, skus, groups, 'Sistem Inventori Prabungkus Hospital Keningau');
+      const html = buildPrintHtml(fullOrder, items, skus, groups, 'Sistem Inventori Prabungkus Hospital Keningau', settings);
       const w = window.open('', '_blank');
       if (w) {
         w.document.write(html);
