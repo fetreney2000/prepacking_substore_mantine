@@ -59,7 +59,7 @@ function buildPrintHtml(
 
   const defaultSettings: Settings = {
     id: 3, minWeeks: 2, bufferWeeks: 4, maxWeeks: 6,
-    defaultFilename: '', appTitle: '', layoutMode: 'table'
+    defaultFilename: '', appTitle: ''
   };
   const effectiveSettings = settings || defaultSettings;
 

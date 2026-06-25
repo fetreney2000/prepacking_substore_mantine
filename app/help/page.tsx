@@ -216,7 +216,7 @@ export default function HelpPage() {
             <List.Item>Minggu Beza: Tambahan untuk turun naik permintaan</List.Item>
             <List.Item>Maksimum Minggu: Had atas pengiraan stok</List.Item>
             <List.Item>Nama Fail Lalai: Nama fail untuk eksport</List.Item>
-            <List.Item>Mod Aturan: Jadual atau Kad untuk paparan</List.Item>
+
           </List>
 
           <Divider />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Title,
   Paper,
@@ -31,8 +31,13 @@ export default function SyncPage() {
   const [exporting, setExporting] = useState(false);
   const [importingDb, setImportingDb] = useState(false);
   const [importingExcel, setImportingExcel] = useState(false);
+  const [defaultFilename, setDefaultFilename] = useState('');
   const dbFileRef = useRef<HTMLInputElement>(null);
   const excelFileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    api.settings.get().then((s) => setDefaultFilename(s.defaultFilename || '')).catch(() => {});
+  }, []);
 
   async function handleExportDb() {
     setExporting(true);
@@ -44,7 +49,7 @@ export default function SyncPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `inventory-export-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `${defaultFilename || `inventory-export-${new Date().toISOString().slice(0, 10)}`}.json`;
       a.click();
       URL.revokeObjectURL(url);
       notifications.show({

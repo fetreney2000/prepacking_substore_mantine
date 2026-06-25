@@ -5,7 +5,6 @@ export interface Settings {
   maxWeeks: number;
   defaultFilename: string;
   appTitle: string;
-  layoutMode: 'table' | 'card';
 }
 
 export interface Group {
