@@ -201,7 +201,7 @@ export default function SKUReportPage() {
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<title>Laporan SKU</title>
+<title>Laporan Item</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 24px; color: #1e293b; }
@@ -215,7 +215,7 @@ export default function SKUReportPage() {
 </style>
 </head>
 <body>
-<h1>Laporan SKU</h1>
+<h1>Laporan Item</h1>
 <div class="meta">Dijana pada: ${dateStr}</div>
 ${colToggleBar}
 <table>
@@ -284,7 +284,7 @@ ${rowsHtml}
   return (
     <Container size="xl" py="xl">
       <Title order={2} mb="xl">
-        Laporan SKU
+        Laporan Item
       </Title>
 
       <Paper p="md" mb="xl" withBorder>

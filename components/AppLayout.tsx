@@ -19,7 +19,7 @@ const navItems = [
   { label: 'Cipta Pesanan', href: '/create-order', icon: IconPlus },
   { label: 'Senarai Pesanan', href: '/edit-order', icon: IconClipboardList },
   { label: 'Laporan Pesanan', href: '/order-report', icon: IconReport },
-  { label: 'Laporan SKU', href: '/sku-report', icon: IconChartBar },
+  { label: 'Laporan Item', href: '/sku-report', icon: IconChartBar },
   { label: 'Tetapan', href: '/settings', icon: IconSettings },
   { label: 'Penyelarasan Data', href: '/sync', icon: IconRefresh },
   { label: 'Bantuan', href: '/help', icon: IconHelp },
