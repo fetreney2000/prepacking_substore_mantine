@@ -14,7 +14,7 @@ import { api } from '@/lib/api';
 
 const navItems = [
   { label: 'Papan Pemuka', href: '/dashboard', icon: IconDashboard },
-  { label: 'Pengurusan SKU', href: '/skus', icon: IconPackage },
+  { label: 'Pengurusan Item', href: '/skus', icon: IconPackage },
   { label: 'Pengurusan Kumpulan', href: '/groups', icon: IconUsers },
   { label: 'Cipta Pesanan', href: '/create-order', icon: IconPlus },
   { label: 'Senarai Pesanan', href: '/edit-order', icon: IconClipboardList },

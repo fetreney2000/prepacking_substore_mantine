@@ -27,7 +27,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IconPlus, IconEdit, IconTrash, IconSearch, IconCheck, IconX } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconSearch, IconCheck, IconX } from '@tabler/icons-react';
 import ColumnToggle from '@/components/ColumnToggle';
 
 const emptyForm = {
@@ -68,11 +68,11 @@ export default function SKUsPage() {
   const [colNama, setColNama] = useState(true);
   const [colKumpulan, setColKumpulan] = useState(true);
   const [colStok, setColStok] = useState(true);
-  const [colAwu, setColAwu] = useState(true);
-  const [colMin, setColMin] = useState(true);
-  const [colPenimbal, setColPenimbal] = useState(true);
+  const [colAwu, setColAwu] = useState(false);
+  const [colMin, setColMin] = useState(false);
+  const [colPenimbal, setColPenimbal] = useState(false);
   const [colMaks, setColMaks] = useState(true);
-  const [colStatus, setColStatus] = useState(true);
+  const [colStatus, setColStatus] = useState(false);
   const [colAksi, setColAksi] = useState(true);
 
   const fetchData = async () => {
@@ -203,7 +203,11 @@ export default function SKUsPage() {
       const levels = calculateLevels(sku, settings);
       const status = determineStockStatus(sku, levels);
       return (
-        <tr key={sku.id}>
+        <tr
+          key={sku.id}
+          onClick={() => handleOpenModal(sku)}
+          style={{ cursor: 'pointer' }}
+        >
           {colKod && <td>{sku.kod}</td>}
           {colNama && <td>{sku.nama}</td>}
           {colKumpulan && <td>{groupName(sku.groupId)}</td>}
@@ -221,29 +225,19 @@ export default function SKUsPage() {
           )}
           {colAksi && (
             <td>
-              <MantineGroup gap="xs" wrap="nowrap">
-                <Tooltip label="Edit" position="top" withArrow>
-                  <ActionIcon
-                    variant="subtle"
-                    color="blue"
-                    onClick={() => handleOpenModal(sku)}
-                  >
-                    <IconEdit size={16} />
-                  </ActionIcon>
-                </Tooltip>
-                <Tooltip label="Padam" position="top" withArrow>
-                  <ActionIcon
-                    variant="subtle"
-                    color="red"
-                    onClick={() => {
-                      setDeletingSKU(sku);
-                      setDeleteModalOpen(true);
-                    }}
-                  >
-                    <IconTrash size={16} />
-                  </ActionIcon>
-                </Tooltip>
-              </MantineGroup>
+              <Tooltip label="Padam" position="top" withArrow>
+                <ActionIcon
+                  variant="subtle"
+                  color="red"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeletingSKU(sku);
+                    setDeleteModalOpen(true);
+                  }}
+                >
+                  <IconTrash size={16} />
+                </ActionIcon>
+              </Tooltip>
             </td>
           )}
         </tr>
@@ -256,9 +250,9 @@ export default function SKUsPage() {
   return (
     <Container size="xl" py="xl">
       <MantineGroup justify="space-between" mb="xl">
-        <Title order={2}>Pengurusan SKU</Title>
+        <Title order={2}>Pengurusan Item</Title>
         <Button leftSection={<IconPlus size={16} />} onClick={() => handleOpenModal()}>
-          Tambah SKU
+          Tambah Item
         </Button>
       </MantineGroup>
 
@@ -345,7 +339,7 @@ export default function SKUsPage() {
       <Modal
         opened={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingSKU ? 'Kemaskini SKU' : 'Tambah SKU'}
+        title={editingSKU ? 'Kemaskini Item' : 'Tambah Item'}
         size="lg"
       >
         <Stack gap="md">
@@ -479,7 +473,7 @@ export default function SKUsPage() {
       >
         <Stack gap="md">
           <Text>
-            Adakah anda pasti ingin memadam SKU{' '}
+            Adakah anda pasti ingin memadam Item{' '}
             <strong>{deletingSKU?.kod}</strong> ({deletingSKU?.nama})?
           </Text>
           <MantineGroup justify="flex-end" mt="md">
