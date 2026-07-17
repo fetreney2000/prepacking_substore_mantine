@@ -82,7 +82,6 @@ export default function SettingsPage() {
         <Stack gap="md">
           <TextInput
             label="Nama Aplikasi"
-            placeholder="Nama aplikasi"
             value={appTitle}
             onChange={(e) => setAppTitle(e.currentTarget.value)}
           />
@@ -116,7 +115,6 @@ export default function SettingsPage() {
 
           <TextInput
             label="Nama Fail Lalai"
-            placeholder="Nama fail untuk eksport"
             value={defaultFilename}
             onChange={(e) => setDefaultFilename(e.currentTarget.value)}
           />

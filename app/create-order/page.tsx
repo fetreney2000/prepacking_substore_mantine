@@ -212,7 +212,6 @@ export default function CreateOrderPage() {
           />
           <TextInput
             label="Nota"
-            placeholder="Nota pilihan"
             value={nota}
             onChange={(e) => setNota(e.currentTarget.value)}
           />
@@ -280,7 +279,6 @@ export default function CreateOrderPage() {
                         onChange={(e) =>
                           handleNotesChange(row.skuId, e.currentTarget.value)
                         }
-                        placeholder="Nota"
                         size="xs"
                       />
                     </Table.Td>

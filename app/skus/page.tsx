@@ -259,14 +259,12 @@ export default function SKUsPage() {
       <Paper p="md" mb="xl" withBorder>
         <MantineGroup gap="md" align="flex-end">
           <TextInput
-            placeholder="Cari kod atau nama..."
             leftSection={<IconSearch size={16} />}
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
             style={{ flex: 1 }}
           />
           <Select
-            placeholder="Semua kumpulan"
             data={groupOptions}
             value={filterGroup}
             onChange={setFilterGroup}
@@ -346,14 +344,12 @@ export default function SKUsPage() {
           <SimpleGrid cols={2}>
             <TextInput
               label="Kod"
-              placeholder="Masukkan kod SKU"
               value={form.kod}
               onChange={(e) => setFormField('kod', e.currentTarget.value)}
               required
             />
             <TextInput
               label="Nama"
-              placeholder="Masukkan nama SKU"
               value={form.nama}
               onChange={(e) => setFormField('nama', e.currentTarget.value)}
               required
@@ -385,7 +381,6 @@ export default function SKUsPage() {
 
           <TextInput
             label="Nota"
-            placeholder="Nota (pilihan)"
             value={form.notes}
             onChange={(e) => setFormField('notes', e.currentTarget.value)}
           />
@@ -413,6 +408,77 @@ export default function SKUsPage() {
               min={0}
             />
           </SimpleGrid>
+
+          {(form.usageMonth1 > 0 || form.usageMonth2 > 0 || form.usageMonth3 > 0) && settings && !form.useManualLevels && (
+            <Paper p="sm" withBorder bg="blue.0">
+              <Text size="sm" fw={500} mb="xs">Pratonton Tahap Stok</Text>
+              <SimpleGrid cols={3}>
+                <Box>
+                  <Text size="xs" c="dimmed">Min</Text>
+                  <Text fw={600}>{formatNum(calculateLevels({
+                    id: 0,
+                    kod: form.kod || 'TEMP',
+                    nama: form.nama || 'TEMP',
+                    saizPek: form.saizPek,
+                    groupId: form.groupId,
+                    enabled: true,
+                    fullStockAlways: false,
+                    notes: '',
+                    stokSemasa: 0,
+                    usageMonth1: form.usageMonth1,
+                    usageMonth2: form.usageMonth2,
+                    usageMonth3: form.usageMonth3,
+                    useManualLevels: false,
+                    minManual: 0,
+                    penimbalManual: 0,
+                    maksManual: 0,
+                  }, settings).min)}</Text>
+                </Box>
+                <Box>
+                  <Text size="xs" c="dimmed">Penimbal</Text>
+                  <Text fw={600}>{formatNum(calculateLevels({
+                    id: 0,
+                    kod: form.kod || 'TEMP',
+                    nama: form.nama || 'TEMP',
+                    saizPek: form.saizPek,
+                    groupId: form.groupId,
+                    enabled: true,
+                    fullStockAlways: false,
+                    notes: '',
+                    stokSemasa: 0,
+                    usageMonth1: form.usageMonth1,
+                    usageMonth2: form.usageMonth2,
+                    usageMonth3: form.usageMonth3,
+                    useManualLevels: false,
+                    minManual: 0,
+                    penimbalManual: 0,
+                    maksManual: 0,
+                  }, settings).penimbal)}</Text>
+                </Box>
+                <Box>
+                  <Text size="xs" c="dimmed">Maks</Text>
+                  <Text fw={600}>{formatNum(calculateLevels({
+                    id: 0,
+                    kod: form.kod || 'TEMP',
+                    nama: form.nama || 'TEMP',
+                    saizPek: form.saizPek,
+                    groupId: form.groupId,
+                    enabled: true,
+                    fullStockAlways: false,
+                    notes: '',
+                    stokSemasa: 0,
+                    usageMonth1: form.usageMonth1,
+                    usageMonth2: form.usageMonth2,
+                    usageMonth3: form.usageMonth3,
+                    useManualLevels: false,
+                    minManual: 0,
+                    penimbalManual: 0,
+                    maksManual: 0,
+                  }, settings).maks)}</Text>
+                </Box>
+              </SimpleGrid>
+            </Paper>
+          )}
 
           <MantineGroup gap="xl">
             <Switch

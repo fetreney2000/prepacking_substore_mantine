@@ -290,7 +290,6 @@ ${rowsHtml}
       <Paper p="md" mb="xl" withBorder>
         <MantineGroup gap="md" align="flex-end">
           <Select
-            placeholder="Status"
             data={STATUS_OPTIONS}
             value={statusFilter}
             onChange={setStatusFilter}

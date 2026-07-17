@@ -160,13 +160,11 @@ export default function OrderReportPage() {
             />
             <TextInput
               label="Pembuat"
-              placeholder="Tapis mengikut nama pembuat..."
               value={filterPembuat}
               onChange={(e) => setFilterPembuat(e.currentTarget.value)}
             />
             <Select
               label="SKU"
-              placeholder="Semua SKU"
               data={skuOptions}
               value={filterSkuId}
               onChange={setFilterSkuId}

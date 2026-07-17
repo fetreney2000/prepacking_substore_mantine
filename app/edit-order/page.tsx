@@ -436,7 +436,6 @@ export default function EditOrderPage() {
 
       <Paper withBorder p="md">
         <TextInput
-          placeholder="Cari mengikut ID, tarikh, atau pembuat..."
           leftSection={<IconSearch size={16} />}
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
@@ -560,7 +559,6 @@ export default function EditOrderPage() {
           </Group>
           <TextInput
             label="Nota"
-            placeholder="Nota pesanan"
             value={editNotes}
             onChange={(e) => setEditNotes(e.currentTarget.value)}
           />
@@ -611,7 +609,6 @@ export default function EditOrderPage() {
                         <Table.Tr key={idx}>
                           <Table.Td>
                             <Select
-                              placeholder="Pilih SKU"
                               data={skuOptions}
                               value={item.skuId !== null ? String(item.skuId) : null}
                               onChange={(val) => handleItemSkuChange(idx, val)}
@@ -641,7 +638,6 @@ export default function EditOrderPage() {
                           {colItemNota && (
                             <Table.Td>
                               <TextInput
-                                placeholder="Nota item"
                                 value={item.notes}
                                 onChange={(e) => handleItemNotesChange(idx, e.currentTarget.value)}
                                 size="xs"

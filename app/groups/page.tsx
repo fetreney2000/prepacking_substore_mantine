@@ -260,14 +260,12 @@ export default function GroupsPage() {
         <Stack gap="md">
           <TextInput
             label="Nama"
-            placeholder="Masukkan nama kumpulan"
             value={name}
             onChange={(e) => setName(e.currentTarget.value)}
             required
           />
           <Textarea
             label="Nota"
-            placeholder="Masukkan nota (pilihan)"
             value={notes}
             onChange={(e) => setNotes(e.currentTarget.value)}
           />
