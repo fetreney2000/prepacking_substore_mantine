@@ -169,6 +169,7 @@ function buildPrintHtml(
   .btn-close:hover{background:#d1d5db}
   ${toggleStyle}
   @media print{.print-actions{display:none!important}body{padding:8px}}
+</style>
 </head>
 <body>
   <div class="header-bar">
