@@ -135,12 +135,12 @@ function buildPrintHtml(
 
   const colToggleBar = `
     <div class="col-toggle-bar">
-      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-kod').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kod</span></label>
-      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-nama').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Nama</span></label>
-      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-stok').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Stok</span></label>
-      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-awu').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">AWU</span></label>
-      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
-      <label><input type="checkbox" checked onchange="document.querySelectorAll('.pc-kumpulan').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.pc-status').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kumpulan/Status</span></label>
+      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-kod').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Kod</span></label>
+      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-nama').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Nama</span></label>
+      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-stok').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Stok</span></label>
+      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-awu').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">AWU</span></label>
+      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-min,.pc-penimbal,.pc-maks').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
+      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-kumpulan,.pc-status').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Kumpulan/Status</span></label>
     </div>`;
 
   return `<!DOCTYPE html>
@@ -150,26 +150,25 @@ function buildPrintHtml(
 <title>${appTitle} — Pesanan #${order.id}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1f2937;padding:32px;font-size:13px;line-height:1.5}
-  table{width:100%;border-collapse:collapse;margin-top:12px}
-  th{background:#1e3a8a;color:#fff;padding:8px 12px;text-align:left;font-weight:600;font-size:12px}
-  td{border-bottom:1px solid #e5e7eb}
-  .header-bar{background:linear-gradient(135deg,#1E3A8A,#2563EB);color:#fff;text-align:center;margin-bottom:16px;padding:16px;border-radius:6px}
-  .header-bar h2{font-size:16pt;margin:0;color:#fff}
-  .header-bar h3{font-size:13pt;margin:4px 0;color:#93c5fd}
-  .info-box{margin-bottom:12px;font-size:10pt;border:1px solid #c0d4e8;padding:10px;border-radius:4px;background:#f0f4ff}
-  .sig-row{display:flex;gap:60px;margin-top:40px}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1f2937;padding:16px;font-size:9px;line-height:1.3}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th{background:#1e3a8a;color:#fff;padding:4px 6px;text-align:left;font-weight:600;font-size:8px}
+  td{padding:3px 6px;border-bottom:1px solid #e5e7eb}
+  .header-bar{background:linear-gradient(135deg,#1E3A8A,#2563EB);color:#fff;text-align:center;margin-bottom:8px;padding:8px;border-radius:4px}
+  .header-bar h2{font-size:11pt;margin:0;color:#fff}
+  .header-bar h3{font-size:9pt;margin:2px 0;color:#93c5fd}
+  .info-box{margin-bottom:6px;font-size:8pt;border:1px solid #c0d4e8;padding:6px;border-radius:4px;background:#f0f4ff}
+  .sig-row{display:flex;gap:40px;margin-top:20px}
   .sig-box{flex:1}
-  .sig-box p{margin-bottom:50px}
-  .print-actions{text-align:center;margin-top:24px}
-  .print-actions button{padding:10px 24px;margin:0 8px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+  .sig-box p{margin-bottom:20px;font-size:8pt}
+  .print-actions{text-align:center;margin-top:12px}
+  .print-actions button{padding:6px 16px;margin:0 6px;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer}
   .btn-print{background:#2563eb;color:#fff}
   .btn-print:hover{background:#1d4ed8}
   .btn-close{background:#e5e7eb;color:#374151}
   .btn-close:hover{background:#d1d5db}
   ${toggleStyle}
-  @media print{.print-actions{display:none!important}body{padding:16px}}
-</style>
+  @media print{.print-actions{display:none!important}body{padding:8px}}
 </head>
 <body>
   <div class="header-bar">

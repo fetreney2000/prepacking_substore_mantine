@@ -191,10 +191,10 @@ export default function SKUReportPage() {
 
     const colToggleBar = `
       <div class="col-toggle-bar">
-        <label><input type="checkbox" checked onchange="document.querySelectorAll('.sr-kumpulan').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Kumpulan</span></label>
-        <label><input type="checkbox" checked onchange="document.querySelectorAll('.sr-min').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.sr-penimbal').forEach(el=>el.classList.toggle('col-hidden',!this.checked));document.querySelectorAll('.sr-maks').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
-        <label><input type="checkbox" checked onchange="document.querySelectorAll('.sr-minggu').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Minggu Stok</span></label>
-        <label><input type="checkbox" checked onchange="document.querySelectorAll('.sr-status').forEach(el=>el.classList.toggle('col-hidden',!this.checked))"><span class="toggle-slider"></span><span class="toggle-label">Status</span></label>
+        <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.sr-kumpulan').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Kumpulan</span></label>
+        <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.sr-min,.sr-penimbal,.sr-maks').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
+        <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.sr-minggu').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Minggu Stok</span></label>
+        <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.sr-status').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Status</span></label>
       </div>`;
 
     const html = `<!DOCTYPE html>
