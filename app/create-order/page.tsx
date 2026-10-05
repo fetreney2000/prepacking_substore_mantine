@@ -19,7 +19,7 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { api } from '@/lib/api';
 import { calculateAWU, calculateOrderQty } from '@/lib/calculations';
-import { formatNum } from '@/lib/format';
+import { formatNum, localDateStr } from '@/lib/format';
 import { SKU } from '@/lib/types';
 import ColumnToggle from '@/components/ColumnToggle';
 
@@ -33,8 +33,9 @@ interface OrderRow {
   notes: string;
 }
 
+/** Today's date in LOCAL time (see `localDateStr` — UTC showed yesterday). */
 function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localDateStr();
 }
 
 export default function CreateOrderPage() {
@@ -184,8 +185,6 @@ export default function CreateOrderPage() {
       </Center>
     );
   }
-
-  const visibleCount = [colKodNama, colAwu, colStok, colKuantiti, colNota].filter(Boolean).length;
 
   return (
     <Stack gap="lg">
