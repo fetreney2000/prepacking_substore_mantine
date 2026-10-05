@@ -3,11 +3,17 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@mantine/core": "^7.11.0",
@@ -15,18 +21,24 @@
     "@mantine/notifications": "^7.11.0",
     "@tabler/icons-react": "^3.6.0",
     "mongoose": "^8.0.0",
-    "next": "^14.2.0",
+    "next": "^15.5.24",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "postcss": "^8.4.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.27",
+    "postcss": "^8.5.28",
     "postcss-preset-mantine": "^1.15.0",
     "postcss-simple-vars": "^7.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "4.1.11"
+  },
+  "overrides": {
+    "postcss": "^8.5.28"
   }
 }
