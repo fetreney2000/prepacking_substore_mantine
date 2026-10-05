@@ -23,8 +23,15 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { IconSearch, IconPrinter, IconEdit, IconTrash, IconPlus } from '@tabler/icons-react';
 import { api } from '@/lib/api';
-import { calculateOrderQty, calculateAWU, calculateLevels, determineStockStatus, statusLabel, statusColor } from '@/lib/calculations';
+import {
+  calculateOrderQty,
+  calculateAWU,
+  calculateLevels,
+  determineStockStatus,
+  statusLabel,
+} from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
+import { escapeHtml } from '@/lib/print';
 import { SKU, Order, OrderItem, Settings } from '@/lib/types';
 import ColumnToggle from '@/components/ColumnToggle';
 
@@ -66,14 +73,14 @@ function buildPrintHtml(
   let rowsHtml = '';
   let idx = 1;
   for (const gName of Object.keys(grouped).sort()) {
-    rowsHtml += `<tr style="background:#e0e7ff"><td colspan="9" style="font-weight:700;padding:6px 8px">${gName}</td></tr>`;
+    rowsHtml += `<tr style="background:#e0e7ff"><td colspan="9" style="font-weight:700;padding:6px 8px">${escapeHtml(gName)}</td></tr>`;
     for (const item of grouped[gName]) {
       const sku = skus.find((s) => s.id === item.skuId);
       const levels = sku ? calculateLevels(sku, effectiveSettings) : { awu: 0, min: 0, penimbal: 0, maks: 0 };
       rowsHtml += `<tr>`;
       rowsHtml += `<td style="padding:5px 8px;text-align:center">${idx++}</td>`;
-      rowsHtml += `<td class="pc-kod" style="padding:5px 8px"><code>${item.kod}</code></td>`;
-      rowsHtml += `<td class="pc-nama" style="padding:5px 8px">${sku?.nama ?? '-'}</td>`;
+      rowsHtml += `<td class="pc-kod" style="padding:5px 8px"><code>${escapeHtml(item.kod)}</code></td>`;
+      rowsHtml += `<td class="pc-nama" style="padding:5px 8px">${escapeHtml(sku?.nama ?? '-')}</td>`;
       rowsHtml += `<td class="pc-stok" style="padding:5px 8px;text-align:right">${formatNum(sku?.stokSemasa || 0)}</td>`;
       rowsHtml += `<td class="pc-awu" style="padding:5px 8px;text-align:right">${levels.awu}</td>`;
       rowsHtml += `<td class="pc-min" style="padding:5px 8px;text-align:right">${formatNum(levels.min)}</td>`;
@@ -109,21 +116,21 @@ function buildPrintHtml(
     notOrderedHtml += `<tbody>`;
 
     for (const gName of Object.keys(notOrderedGrouped).sort()) {
-      notOrderedHtml += `<tr style="background:#e0e7ff"><td colspan="9" style="font-weight:700;padding:6px 12px">${gName}</td></tr>`;
+      notOrderedHtml += `<tr style="background:#e0e7ff"><td colspan="9" style="font-weight:700;padding:6px 12px">${escapeHtml(gName)}</td></tr>`;
       for (const sku of notOrderedGrouped[gName]) {
         const levels = calculateLevels(sku, effectiveSettings);
         const status = determineStockStatus(sku, levels);
         const statusText = statusLabel(status);
         notOrderedHtml += `<tr>`;
-        notOrderedHtml += `<td class="pc-kod" style="padding:5px 8px"><code>${sku.kod}</code></td>`;
-        notOrderedHtml += `<td class="pc-nama" style="padding:5px 8px">${sku.nama}</td>`;
-        notOrderedHtml += `<td class="pc-kumpulan" style="padding:5px 8px">${groupNameFromId(groups, sku.groupId)}</td>`;
+        notOrderedHtml += `<td class="pc-kod" style="padding:5px 8px"><code>${escapeHtml(sku.kod)}</code></td>`;
+        notOrderedHtml += `<td class="pc-nama" style="padding:5px 8px">${escapeHtml(sku.nama)}</td>`;
+        notOrderedHtml += `<td class="pc-kumpulan" style="padding:5px 8px">${escapeHtml(groupNameFromId(groups, sku.groupId))}</td>`;
         notOrderedHtml += `<td class="pc-stok" style="padding:5px 8px;text-align:right">${formatNum(sku.stokSemasa || 0)}</td>`;
         notOrderedHtml += `<td class="pc-awu" style="padding:5px 8px;text-align:right">${levels.awu}</td>`;
         notOrderedHtml += `<td class="pc-min" style="padding:5px 8px;text-align:right">${formatNum(levels.min)}</td>`;
         notOrderedHtml += `<td class="pc-penimbal" style="padding:5px 8px;text-align:right">${formatNum(levels.penimbal)}</td>`;
         notOrderedHtml += `<td class="pc-maks" style="padding:5px 8px;text-align:right">${formatNum(levels.maks)}</td>`;
-        notOrderedHtml += `<td class="pc-status" style="padding:5px 8px">${statusText}</td>`;
+        notOrderedHtml += `<td class="pc-status" style="padding:5px 8px">${escapeHtml(statusText)}</td>`;
         notOrderedHtml += `</tr>`;
       }
     }
@@ -147,7 +154,7 @@ function buildPrintHtml(
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<title>${appTitle} — Pesanan #${order.id}</title>
+<title>${escapeHtml(appTitle)} — Pesanan #${order.id}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1f2937;padding:16px;font-size:9px;line-height:1.3}
@@ -173,15 +180,15 @@ function buildPrintHtml(
 </head>
 <body>
   <div class="header-bar">
-    <h2>${appTitle}</h2>
+    <h2>${escapeHtml(appTitle)}</h2>
     <h3>Borang Permohonan Stok</h3>
   </div>
   <div class="info-box">
     <strong>ID Pesanan:</strong> ${order.id} &nbsp;|&nbsp;
-    <strong>Tarikh:</strong> ${order.tarikh || ''} &nbsp;|&nbsp;
-    <strong>Pembuat:</strong> ${order.namaPembuat || ''} &nbsp;|&nbsp;
+    <strong>Tarikh:</strong> ${escapeHtml(order.tarikh || '')} &nbsp;|&nbsp;
+    <strong>Pembuat:</strong> ${escapeHtml(order.namaPembuat || '')} &nbsp;|&nbsp;
     <strong>Tempoh:</strong> ${order.tempohMinggu} minggu
-    ${order.notes ? `<br><strong>Nota:</strong> ${order.notes}` : ''}
+    ${order.notes ? `<br><strong>Nota:</strong> ${escapeHtml(order.notes)}` : ''}
   </div>
   ${colToggleBar}
   <table>

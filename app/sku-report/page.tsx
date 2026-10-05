@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { api } from '@/lib/api';
 import { calculateLevels, determineStockStatus, statusLabel, statusColor } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
+import { escapeHtml } from '@/lib/print';
 import { SKU, Group, Settings, StockLevels, StockStatus } from '@/lib/types';
 import {
   Container,
@@ -20,8 +21,10 @@ import {
   Box,
   Loader,
   Center,
+  Alert,
 } from '@mantine/core';
-import { IconPrinter, IconReport } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
+import { IconPrinter, IconReport, IconAlertCircle } from '@tabler/icons-react';
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Semua' },
@@ -45,6 +48,7 @@ export default function SKUReportPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>('all');
   const [reportGenerated, setReportGenerated] = useState(false);
 
@@ -53,25 +57,31 @@ export default function SKUReportPage() {
   const [showPenimbal, setShowPenimbal] = useState(false);
   const [showMaks, setShowMaks] = useState(false);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [skusData, groupsData, settingsData] = await Promise.all([
-          api.skus.list(),
-          api.groups.list(),
-          api.settings.get(),
-        ]);
-        setSkus(skusData);
-        setGroups(groupsData);
-        setSettings(settingsData);
-      } catch {
-        console.error('Gagal memuatkan data laporan');
-      } finally {
-        setLoading(false);
-      }
+  const fetchData = useCallback(async () => {
+    setLoadError(null);
+    try {
+      const [skusData, groupsData, settingsData] = await Promise.all([
+        api.skus.list(),
+        api.groups.list(),
+        api.settings.get(),
+      ]);
+      setSkus(skusData);
+      setGroups(groupsData);
+      setSettings(settingsData);
+    } catch (err) {
+      // console.error only, previously: without settings the report silently
+      // renders as "Tiada data ditemui" (review #14).
+      setLoadError(
+        err instanceof Error && err.message ? err.message : 'Gagal memuatkan data laporan.'
+      );
+    } finally {
+      setLoading(false);
     }
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const groupNameMap = useMemo(() => {
     const map = new Map<number, string>();
@@ -126,19 +136,6 @@ export default function SKUReportPage() {
   const handlePrint = useCallback(() => {
     const colCount = 10;
 
-    const visibleHeaders = [
-      'Kod',
-      'Nama',
-      ...(showKumpulan ? ['Kumpulan'] : []),
-      'Stok Semasa',
-      'AWU',
-      ...(showMin ? ['Min'] : []),
-      ...(showPenimbal ? ['Penimbal'] : []),
-      ...(showMaks ? ['Maks'] : []),
-      'Minggu Stok',
-      'Status',
-    ];
-
     let rowsHtml = '';
     const now = new Date();
     const dateStr = now.toLocaleDateString('ms-MY', {
@@ -152,7 +149,7 @@ export default function SKUReportPage() {
     groupedRows.forEach((rows, groupId) => {
       const gName =
         groupId === 'none' ? 'Tanpa Kumpulan' : groupNameMap.get(groupId as number) || 'Tidak Diketahui';
-      rowsHtml += `<tr><td colspan="${colCount}" style="background:#e6eff8;font-weight:700;padding:8px 12px;border:1px solid #d9e1ec;">${gName}</td></tr>`;
+      rowsHtml += `<tr><td colspan="${colCount}" style="background:#e6eff8;font-weight:700;padding:8px 12px;border:1px solid #d9e1ec;">${escapeHtml(gName)}</td></tr>`;
 
       rows.forEach((row) => {
         const statusBadgeColor =
@@ -173,16 +170,16 @@ export default function SKUReportPage() {
             : '#f3f4f6';
 
         rowsHtml += '<tr>';
-        rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;">${row.sku.kod}</td>`;
-        rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;">${row.sku.nama}</td>`;
-        rowsHtml += `<td class="sr-kumpulan" style="padding:6px 12px;border:1px solid #d9e1ec;">${row.groupName}</td>`;
+        rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;">${escapeHtml(row.sku.kod)}</td>`;
+        rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;">${escapeHtml(row.sku.nama)}</td>`;
+        rowsHtml += `<td class="sr-kumpulan" style="padding:6px 12px;border:1px solid #d9e1ec;">${escapeHtml(row.groupName)}</td>`;
         rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.sku.stokSemasa)}</td>`;
         rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.awu)}</td>`;
         rowsHtml += `<td class="sr-min" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.min)}</td>`;
         rowsHtml += `<td class="sr-penimbal" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.penimbal)}</td>`;
         rowsHtml += `<td class="sr-maks" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.maks)}</td>`;
         rowsHtml += `<td class="sr-minggu" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${row.mingguStok !== null ? row.mingguStok.toFixed(2) : '-'}</td>`;
-        rowsHtml += `<td class="sr-status" style="padding:6px 12px;border:1px solid #d9e1ec;"><span style="background:${statusBadgeBg};color:${statusBadgeColor};padding:2px 8px;border-radius:4px;font-size:12px;">${statusLabel(row.status)}</span></td>`;
+        rowsHtml += `<td class="sr-status" style="padding:6px 12px;border:1px solid #d9e1ec;"><span style="background:${statusBadgeBg};color:${statusBadgeColor};padding:2px 8px;border-radius:4px;font-size:12px;">${escapeHtml(statusLabel(row.status))}</span></td>`;
         rowsHtml += '</tr>';
       });
     });
@@ -216,7 +213,7 @@ export default function SKUReportPage() {
 </head>
 <body>
 <h1>Laporan Item</h1>
-<div class="meta">Dijana pada: ${dateStr}</div>
+<div class="meta">Dijana pada: ${escapeHtml(dateStr)}</div>
 ${colToggleBar}
 <table>
 <thead>
@@ -246,8 +243,15 @@ ${rowsHtml}
     if (popup) {
       popup.document.write(html);
       popup.document.close();
+    } else {
+      // A blocked popup used to look like "the button did nothing".
+      notifications.show({
+        title: 'Amaran',
+        message: 'Sila benarkan pop-up untuk mencetak',
+        color: 'yellow',
+      });
     }
-  }, [groupedRows, filteredRows, showKumpulan, showMin, showPenimbal, showMaks, groupNameMap]);
+  }, [groupedRows, filteredRows, groupNameMap]);
 
   const visibleColCount =
     2 + (showKumpulan ? 1 : 0) + 1 + 1 + (showMin ? 1 : 0) + (showPenimbal ? 1 : 0) + (showMaks ? 1 : 0) + 1 + 1;
@@ -286,6 +290,22 @@ ${rowsHtml}
       <Title order={2} mb="xl">
         Laporan Item
       </Title>
+
+      {loadError && (
+        <Alert
+          color="red"
+          icon={<IconAlertCircle size={16} />}
+          title="Gagal memuatkan data"
+          mb="xl"
+        >
+          <MantineGroup justify="space-between" align="center" gap="sm">
+            <Text size="sm">{loadError}</Text>
+            <Button size="xs" variant="light" onClick={fetchData}>
+              Cuba semula
+            </Button>
+          </MantineGroup>
+        </Alert>
+      )}
 
       <Paper p="md" mb="xl" withBorder>
         <MantineGroup gap="md" align="flex-end">
