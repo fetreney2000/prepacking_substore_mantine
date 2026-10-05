@@ -2,9 +2,6 @@
 
 import { MantineProvider, createTheme } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
-import '@mantine/core/styles.css';
-import '@mantine/notifications/styles.css';
-import './globals.css';
 import AppLayout from '@/components/AppLayout';
 
 const theme = createTheme({

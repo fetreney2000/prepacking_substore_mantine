@@ -3,10 +3,22 @@ import {
   ExportData, ExcelImportResult,
 } from './types';
 
+/** 
+ * Client-side ceiling on every request. The server caps handlers at 30s
+ * (`maxDuration`), so 35s only ever fires when the connection itself hangs —
+ * turning an endless spinner into an error the pages can report (review #29).
+ */
+function defaultSignal(): AbortSignal | undefined {
+  return typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(35_000) : undefined;
+}
+
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
     ...options,
+    // Default Content-Type, but a caller-supplied header must win — the
+    // spread order used to let `options` clobber the merged headers entirely.
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    signal: options?.signal ?? defaultSignal(),
   });
   // Session expired / not signed in: bounce to the login page (except there).
   if (
@@ -17,8 +29,11 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
     window.location.assign('/login');
     throw new Error('Sesi tamat. Sila log masuk semula.');
   }
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+  // A non-JSON body (an HTML 404/500 page, an empty response) used to throw
+  // "Unexpected token <" instead of reporting the actual status.
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error((data && data.error) || `HTTP ${res.status}`);
+  if (data === null) throw new Error(`Respons tidak sah dari ${url}`);
   return data as T;
 }
 

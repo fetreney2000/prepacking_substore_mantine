@@ -71,7 +71,9 @@ a {
   }
 }
 
-/* Ensure tables scroll horizontally on small screens */
-table {
+/* Ensure tables scroll horizontally on small screens. Scoped to the app shell
+   so portal-rendered tables inside modals are not forced to 600px (that made
+   dialogs overflow) — review item #30. */
+.mantine-AppShell-main table {
   min-width: 600px;
 }
