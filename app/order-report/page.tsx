@@ -20,7 +20,7 @@ import {
 } from '@mantine/core';
 import { api } from '@/lib/api';
 import { formatNum } from '@/lib/format';
-import { SKU, Group as GroupType, Order, OrderItem } from '@/lib/types';
+import { SKU, Group as GroupType } from '@/lib/types';
 
 interface ReportRow {
   tarikh: string;
@@ -87,11 +87,12 @@ export default function OrderReportPage() {
     setHasGenerated(true);
 
     try {
-      const orders = await api.orders.list();
+      // One request: the date range is applied server-side and every order
+      // arrives with its items embedded — previously this made one HTTP call
+      // per order, in sequence.
+      const orders = await api.report.orders(dateFrom, dateTo);
 
       const filtered = orders.filter((o) => {
-        if (dateFrom && o.tarikh < dateFrom) return false;
-        if (dateTo && o.tarikh > dateTo) return false;
         if (filterPembuat) {
           if (!o.namaPembuat.toLowerCase().includes(filterPembuat.toLowerCase())) return false;
         }
@@ -101,9 +102,7 @@ export default function OrderReportPage() {
       const rows: ReportRow[] = [];
 
       for (const order of filtered) {
-        const items = order.items ?? (await api.orderItems.list(order.id));
-
-        for (const item of items) {
+        for (const item of order.items ?? []) {
           if (filterSkuId && item.skuId !== Number(filterSkuId)) continue;
 
           const sku = skus.find((s) => s.id === item.skuId);

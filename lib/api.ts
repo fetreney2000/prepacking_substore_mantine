@@ -1,5 +1,5 @@
 import {
-  Settings, Group, SKU, Order, OrderItem,
+  Settings, Group, SKU, Order, OrderItem, OrderWithItems,
   ExportData, ExcelImportResult,
 } from './types';
 
@@ -82,9 +82,17 @@ export const api = {
       apiFetch<{ success: boolean }>(`/api/orders/${id}`, { method: 'DELETE' }),
   },
 
-  orderItems: {
-    list: (orderId: number) =>
-      apiFetch<OrderItem[]>(`/api/order-items?orderId=${orderId}`),
+  report: {
+    /** Orders (optionally limited to a date range) with items embedded. */
+    orders: (from?: string, to?: string) => {
+      const params = new URLSearchParams();
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      const query = params.toString();
+      return apiFetch<OrderWithItems[]>(
+        `/api/report/orders${query ? `?${query}` : ''}`
+      );
+    },
   },
 
   exportData: () => apiFetch<ExportData>('/api/export'),

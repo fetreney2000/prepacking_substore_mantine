@@ -51,6 +51,11 @@ export interface OrderItem {
   notes: string;
 }
 
+/** An order with its line items loaded (report endpoints). */
+export interface OrderWithItems extends Order {
+  items: OrderItem[];
+}
+
 export interface StockLevels {
   awu: number;
   min: number;
@@ -60,6 +65,15 @@ export interface StockLevels {
 
 export type StockStatus = 'ok' | 'low' | 'critical' | 'out' | 'disabled';
 
+/** An Excel row the import deliberately did not apply (review item #9). */
+export interface ExcelSkip {
+  /** 1-based sheet row number — row 1 is the header. */
+  row: number;
+  kod: string;
+  nama: string;
+  reason: string;
+}
+
 export interface ExcelImportResult {
   success: boolean;
   filename: string;
@@ -68,6 +82,8 @@ export interface ExcelImportResult {
   missingFromExcel: Array<{ kod: string; nama: string; stokSemasa: number }>;
   missingFromExcelCount: number;
   notFoundInAppCount: number;
+  skipped: ExcelSkip[];
+  skippedCount: number;
 }
 
 export interface ExportData {
