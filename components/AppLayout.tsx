@@ -1,13 +1,13 @@
 'use client';
 
-import { AppShell, Group, Text, Box, NavLink, ScrollArea, Stack } from '@mantine/core';
+import { AppShell, Group, Text, Box, NavLink, ScrollArea, Stack, ActionIcon, Tooltip } from '@mantine/core';
 import {
   IconDashboard, IconPackage, IconUsers, IconPlus,
   IconClipboardList, IconReport, IconChartBar,
   IconSettings, IconRefresh, IconHelp, IconCopyright,
-  IconMenu2,
+  IconLogout,
 } from '@tabler/icons-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
@@ -28,6 +28,7 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [clock, setClock] = useState('');
   const [appTitle, setAppTitle] = useState('Sistem Inventori Farmasi');
 
@@ -50,6 +51,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     document.title = appTitle;
   }, [appTitle]);
 
+  const handleLogout = async () => {
+    try {
+      await api.auth.logout();
+    } catch {
+      // Still drop the local session state even if the call failed.
+    }
+    router.replace('/login');
+    router.refresh();
+  };
+
+  // The sign-in page renders bare, without the nav shell.
+  if (pathname === '/login') {
+    return <>{children}</>;
+  }
+
   return (
     <AppShell
       header={{ height: 56 }}
@@ -64,9 +80,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {appTitle}
             </Text>
           </Group>
-          <Text size="xs" c="rgba(255,255,255,0.8)">
-            {clock}
-          </Text>
+          <Group gap="xs">
+            <Text size="xs" c="rgba(255,255,255,0.8)">
+              {clock}
+            </Text>
+            <Tooltip label="Keluar" position="bottom" withArrow>
+              <ActionIcon
+                variant="subtle"
+                onClick={handleLogout}
+                aria-label="Keluar"
+                style={{ color: 'white' }}
+              >
+                <IconLogout size={18} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
         </Group>
       </AppShell.Header>
 

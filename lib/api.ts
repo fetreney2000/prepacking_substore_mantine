@@ -8,12 +8,31 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     ...options,
   });
+  // Session expired / not signed in: bounce to the login page (except there).
+  if (
+    res.status === 401 &&
+    typeof window !== 'undefined' &&
+    !window.location.pathname.startsWith('/login')
+  ) {
+    window.location.assign('/login');
+    throw new Error('Sesi tamat. Sila log masuk semula.');
+  }
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
   return data as T;
 }
 
 export const api = {
+  auth: {
+    login: (password: string) =>
+      apiFetch<{ success: boolean }>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ password }),
+      }),
+    logout: () =>
+      apiFetch<{ success: boolean }>('/api/auth/logout', { method: 'POST' }),
+  },
+
   settings: {
     get: () => apiFetch<Settings>('/api/settings'),
     update: (body: Partial<Settings>) =>
