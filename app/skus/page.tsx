@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { calculateLevels, determineStockStatus, statusLabel, statusColor } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
@@ -27,7 +27,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IconPlus, IconTrash, IconSearch, IconCheck, IconX } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconSearch } from '@tabler/icons-react';
 import ColumnToggle from '@/components/ColumnToggle';
 
 const emptyForm = {
@@ -85,7 +85,7 @@ export default function SKUsPage() {
       setSkus(skusData);
       setGroups(groupsData);
       setSettings(settingsData);
-    } catch (error) {
+    } catch {
       showNotification({
         title: 'Ralat',
         message: 'Gagal memuatkan data SKU',
@@ -115,11 +115,14 @@ export default function SKUsPage() {
     });
   }, [skus, search, filterGroup, activeOnly]);
 
-  const groupName = (groupId: number | null) => {
-    if (!groupId) return '-';
-    const g = groups.find((gr) => gr.id === groupId);
-    return g ? g.name : '-';
-  };
+  const groupName = useCallback(
+    (groupId: number | null) => {
+      if (!groupId) return '-';
+      const g = groups.find((gr) => gr.id === groupId);
+      return g ? g.name : '-';
+    },
+    [groups]
+  );
 
   const groupOptions = groups.map((g) => ({
     value: String(g.id),
@@ -178,7 +181,7 @@ export default function SKUsPage() {
       }
       setModalOpen(false);
       fetchData();
-    } catch (error) {
+    } catch {
       showNotification({ title: 'Ralat', message: 'Gagal menyimpan SKU', color: 'red' });
     } finally {
       setSubmitting(false);
@@ -192,7 +195,7 @@ export default function SKUsPage() {
       showNotification({ title: 'Berjaya', message: 'SKU berjaya dipadam', color: 'green' });
       setDeleteModalOpen(false);
       fetchData();
-    } catch (error) {
+    } catch {
       showNotification({ title: 'Ralat', message: 'Gagal memadam SKU', color: 'red' });
     }
   };
@@ -243,7 +246,7 @@ export default function SKUsPage() {
         </tr>
       );
     });
-  }, [filteredSKUs, settings, groups, colKod, colNama, colKumpulan, colStok, colAwu, colMin, colPenimbal, colMaks, colStatus, colAksi]);
+  }, [filteredSKUs, settings, groupName, colKod, colNama, colKumpulan, colStok, colAwu, colMin, colPenimbal, colMaks, colStatus, colAksi]);
 
   const visibleCount = [colKod, colNama, colKumpulan, colStok, colAwu, colMin, colPenimbal, colMaks, colStatus, colAksi].filter(Boolean).length;
 

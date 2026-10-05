@@ -49,7 +49,7 @@ export default function GroupsPage() {
       ]);
       setGroups(groupsData);
       setSkus(skusData);
-    } catch (error) {
+    } catch {
       showNotification({
         title: 'Ralat',
         message: 'Gagal memuatkan data kumpulan',
@@ -110,7 +110,7 @@ export default function GroupsPage() {
       }
       setModalOpen(false);
       fetchData();
-    } catch (error) {
+    } catch {
       showNotification({
         title: 'Ralat',
         message: 'Gagal menyimpan kumpulan',
@@ -144,7 +144,7 @@ export default function GroupsPage() {
       });
       setDeleteModalOpen(false);
       fetchData();
-    } catch (error) {
+    } catch {
       showNotification({
         title: 'Ralat',
         message: 'Gagal memadam kumpulan',

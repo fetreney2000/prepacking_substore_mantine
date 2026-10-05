@@ -1,6 +1,6 @@
 'use client';
 
-import { Title, Paper, Stack, Text, Group, Center, Avatar } from '@mantine/core';
+import { Title, Paper, Stack, Text, Group, Avatar } from '@mantine/core';
 import { IconCopyright, IconUser, IconPhone, IconMail } from '@tabler/icons-react';
 
 export default function CopyrightPage() {
