@@ -13,6 +13,7 @@ import {
 import { IconSettings, IconDeviceFloppy } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { api } from '@/lib/api';
+import { catalog, invalidateCatalog } from '@/lib/catalog';
 
 export default function SettingsPage() {
   const [appTitle, setAppTitle] = useState('');
@@ -28,7 +29,7 @@ export default function SettingsPage() {
 
   async function loadSettings() {
     try {
-      const settings = await api.settings.get();
+      const settings = await catalog.settings();
       if (settings) {
         setAppTitle(settings.appTitle || '');
         setMinWeeks(settings.minWeeks ?? 1);
@@ -46,6 +47,44 @@ export default function SettingsPage() {
   }
 
   async function handleSave() {
+    // Mantine can hand back a string for an unparseable value; the old
+    // `as number` cast hid that until it reached the database (review #23).
+    const numbers: Array<[string, number]> = [
+      ['Minimum Minggu', minWeeks],
+      ['Minggu Beza', bufferWeeks],
+      ['Maksimum Minggu', maxWeeks],
+    ];
+    for (const [label, value] of numbers) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        notifications.show({
+          title: 'Ralat',
+          message: `${label} mesti berupa nombor.`,
+          color: 'red',
+        });
+        return;
+      }
+      // The inputs declare min={1}; a negative week count would produce
+      // negative stock levels, where nothing is ever "critical".
+      if (value < 1) {
+        notifications.show({
+          title: 'Ralat',
+          message: `${label} mesti sekurang-kurangnya 1.`,
+          color: 'red',
+        });
+        return;
+      }
+    }
+    // Levels are derived as AWU × weeks, so the order min ≤ buffer ≤ max is
+    // what keeps critical/low/ok meaningful.
+    if (!(minWeeks <= bufferWeeks && bufferWeeks <= maxWeeks)) {
+      notifications.show({
+        title: 'Ralat',
+        message: 'Nilai mesti: Minimum Minggu ≤ Minggu Beza ≤ Maksimum Minggu.',
+        color: 'red',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await api.settings.update({
@@ -55,6 +94,7 @@ export default function SettingsPage() {
         maxWeeks,
         defaultFilename,
       });
+      invalidateCatalog();
       notifications.show({
         title: 'Berjaya',
         message: 'Tetapan telah disimpan',
@@ -90,7 +130,7 @@ export default function SettingsPage() {
             label="Minimum Minggu"
             description="Bilangan minggu minimum untuk pengiraan stok"
             value={minWeeks}
-            onChange={(val) => setMinWeeks(val as number)}
+            onChange={(val) => setMinWeeks(typeof val === 'number' ? val : Number(val))}
             min={1}
             max={12}
           />
@@ -99,7 +139,7 @@ export default function SettingsPage() {
             label="Minggu Beza"
             description="Bilangan minggu beza tambahan"
             value={bufferWeeks}
-            onChange={(val) => setBufferWeeks(val as number)}
+            onChange={(val) => setBufferWeeks(typeof val === 'number' ? val : Number(val))}
             min={1}
             max={12}
           />
@@ -108,7 +148,7 @@ export default function SettingsPage() {
             label="Maksimum Minggu"
             description="Bilangan minggu maksimum untuk pengiraan stok"
             value={maxWeeks}
-            onChange={(val) => setMaxWeeks(val as number)}
+            onChange={(val) => setMaxWeeks(typeof val === 'number' ? val : Number(val))}
             min={1}
             max={52}
           />

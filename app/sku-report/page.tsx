@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
-import { api } from '@/lib/api';
+import { catalog } from '@/lib/catalog';
+import { usePersistedState } from '@/lib/usePersistedState';
 import { calculateLevels, determineStockStatus, statusLabel, statusColor } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
-import { escapeHtml } from '@/lib/print';
+import { escapeHtml, PRINT_TOGGLE_STYLE, buildPrintToggleBar } from '@/lib/print';
 import { SKU, Group, Settings, StockLevels, StockStatus } from '@/lib/types';
 import {
   Container,
@@ -52,18 +53,18 @@ export default function SKUReportPage() {
   const [statusFilter, setStatusFilter] = useState<string | null>('all');
   const [reportGenerated, setReportGenerated] = useState(false);
 
-  const [showKumpulan, setShowKumpulan] = useState(false);
-  const [showMin, setShowMin] = useState(false);
-  const [showPenimbal, setShowPenimbal] = useState(false);
-  const [showMaks, setShowMaks] = useState(false);
+  const [showKumpulan, setShowKumpulan] = usePersistedState('col:sku-report:kumpulan', false);
+  const [showMin, setShowMin] = usePersistedState('col:sku-report:min', false);
+  const [showPenimbal, setShowPenimbal] = usePersistedState('col:sku-report:penimbal', false);
+  const [showMaks, setShowMaks] = usePersistedState('col:sku-report:maks', false);
 
   const fetchData = useCallback(async () => {
     setLoadError(null);
     try {
       const [skusData, groupsData, settingsData] = await Promise.all([
-        api.skus.list(),
-        api.groups.list(),
-        api.settings.get(),
+        catalog.skus(),
+        catalog.groups(),
+        catalog.settings(),
       ]);
       setSkus(skusData);
       setGroups(groupsData);
@@ -184,15 +185,12 @@ export default function SKUReportPage() {
       });
     });
 
-    const toggleStyle = `.col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.col-toggle-bar label{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;font-size:11px;cursor:pointer;user-select:none}.col-toggle-bar input{display:none}.toggle-slider{width:28px;height:16px;background:#cbd5e1;border-radius:8px;position:relative;transition:background .2s;flex-shrink:0;display:inline-block}.toggle-slider::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}.col-toggle-bar input:checked+.toggle-slider{background:#2563eb}.col-toggle-bar input:checked+.toggle-slider::after{transform:translateX(12px)}.col-toggle-bar .toggle-label{font-size:11px;color:#333}@media print{.col-toggle-bar{display:none!important}.col-hidden,.col-hidden *{display:none!important}}`;
-
-    const colToggleBar = `
-      <div class="col-toggle-bar">
-        <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.sr-kumpulan').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Kumpulan</span></label>
-        <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.sr-min,.sr-penimbal,.sr-maks').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
-        <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.sr-minggu').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Minggu Stok</span></label>
-        <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.sr-status').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Status</span></label>
-      </div>`;
+    const colToggleBar = buildPrintToggleBar([
+      { label: 'Kumpulan', selectors: ['.sr-kumpulan'] },
+      { label: 'Min/Penimbal/Maks', selectors: ['.sr-min', '.sr-penimbal', '.sr-maks'] },
+      { label: 'Minggu Stok', selectors: ['.sr-minggu'] },
+      { label: 'Status', selectors: ['.sr-status'] },
+    ]);
 
     const html = `<!DOCTYPE html>
 <html lang="ms">
@@ -207,7 +205,7 @@ export default function SKUReportPage() {
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { background: #1e3a8a; color: #fff; padding: 8px 12px; text-align: left; border: 1px solid #152c6b; }
   .record-count { margin-top: 12px; font-size: 12px; color: #64748b; }
-  ${toggleStyle}
+  ${PRINT_TOGGLE_STYLE}
   @media print { body { padding: 0; } }
 </style>
 </head>

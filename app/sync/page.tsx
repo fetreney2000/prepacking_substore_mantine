@@ -21,6 +21,7 @@ import {
 import { notifications } from '@mantine/notifications';
 import * as XLSX from 'xlsx';
 import { api } from '@/lib/api';
+import { catalog, invalidateCatalog } from '@/lib/catalog';
 import { localDateStr } from '@/lib/format';
 import type { ExcelSkip } from '@/lib/types';
 
@@ -39,7 +40,7 @@ export default function SyncPage() {
   const excelFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.settings.get().then((s) => setDefaultFilename(s.defaultFilename || '')).catch(() => {});
+    catalog.settings().then((s) => setDefaultFilename(s.defaultFilename || '')).catch(() => {});
   }, []);
 
   function downloadJson(data: unknown, filename: string) {
@@ -113,6 +114,8 @@ export default function SyncPage() {
       );
 
       await api.importData(data);
+      // Every list changed; drop the cache before anything renders from it.
+      invalidateCatalog();
       notifications.show({
         title: 'Berjaya',
         message: 'Data berjaya diimport. Sandaran sebelum import telah dimuat turun.',
@@ -151,6 +154,7 @@ export default function SyncPage() {
       const rows = XLSX.utils.sheet_to_json(firstSheet) as Record<string, unknown>[];
 
       const result = await api.importExcel(file.name, rows);
+      invalidateCatalog(); // stock quantities changed
       setImportResults({
         updated: [{ table: 'SKU', count: result.updatedCount }],
         missing: result.missingFromExcel.map((s) => ({ table: s.kod, rows: [s.nama] })),

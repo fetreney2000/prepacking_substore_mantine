@@ -23,15 +23,11 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { IconSearch, IconPrinter, IconEdit, IconTrash, IconPlus } from '@tabler/icons-react';
 import { api } from '@/lib/api';
-import {
-  calculateOrderQty,
-  calculateAWU,
-  calculateLevels,
-  determineStockStatus,
-  statusLabel,
-} from '@/lib/calculations';
+import { catalog } from '@/lib/catalog';
+import { usePersistedState } from '@/lib/usePersistedState';
+import { calculateOrderQty, calculateAWU, calculateLevels, determineStockStatus, statusLabel } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
-import { escapeHtml } from '@/lib/print';
+import { escapeHtml, PRINT_TOGGLE_STYLE, buildPrintToggleBar } from '@/lib/print';
 import { SKU, Order, OrderItem, Settings } from '@/lib/types';
 import ColumnToggle from '@/components/ColumnToggle';
 
@@ -138,17 +134,14 @@ function buildPrintHtml(
     notOrderedHtml += `</tbody></table></div>`;
   }
 
-  const toggleStyle = `.col-toggle-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.col-toggle-bar label{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;font-size:11px;cursor:pointer;user-select:none}.col-toggle-bar input{display:none}.toggle-slider{width:28px;height:16px;background:#cbd5e1;border-radius:8px;position:relative;transition:background .2s;flex-shrink:0;display:inline-block}.toggle-slider::after{content:'';position:absolute;width:12px;height:12px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}.col-toggle-bar input:checked+.toggle-slider{background:#2563eb}.col-toggle-bar input:checked+.toggle-slider::after{transform:translateX(12px)}.col-toggle-bar .toggle-label{font-size:11px;color:#333}@media print{.col-toggle-bar{display:none!important}.col-hidden,.col-hidden *{display:none!important}}`;
-
-  const colToggleBar = `
-    <div class="col-toggle-bar">
-      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-kod').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Kod</span></label>
-      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-nama').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Nama</span></label>
-      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-stok').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Stok</span></label>
-      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-awu').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">AWU</span></label>
-      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-min,.pc-penimbal,.pc-maks').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Min/Penimbal/Maks</span></label>
-      <label onclick="var c=this.querySelector('input');c.checked=!c.checked;document.querySelectorAll('.pc-kumpulan,.pc-status').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">Kumpulan/Status</span></label>
-    </div>`;
+  const colToggleBar = buildPrintToggleBar([
+    { label: 'Kod', selectors: ['.pc-kod'] },
+    { label: 'Nama', selectors: ['.pc-nama'] },
+    { label: 'Stok', selectors: ['.pc-stok'] },
+    { label: 'AWU', selectors: ['.pc-awu'] },
+    { label: 'Min/Penimbal/Maks', selectors: ['.pc-min', '.pc-penimbal', '.pc-maks'] },
+    { label: 'Kumpulan/Status', selectors: ['.pc-kumpulan', '.pc-status'] },
+  ]);
 
   return `<!DOCTYPE html>
 <html lang="ms">
@@ -174,7 +167,7 @@ function buildPrintHtml(
   .btn-print:hover{background:#1d4ed8}
   .btn-close{background:#e5e7eb;color:#374151}
   .btn-close:hover{background:#d1d5db}
-  ${toggleStyle}
+  ${PRINT_TOGGLE_STYLE}
   @media print{.print-actions{display:none!important}body{padding:8px}}
 </style>
 </head>
@@ -228,30 +221,28 @@ export default function EditOrderPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingOrder, setDeletingOrder] = useState<Order | null>(null);
 
-  const [colId, setColId] = useState(true);
-  const [colTarikh, setColTarikh] = useState(true);
-  const [colPembuat, setColPembuat] = useState(true);
-  const [colTempoh, setColTempoh] = useState(true);
-  const [colItem, setColItem] = useState(true);
-  const [colAksi, setColAksi] = useState(true);
+  const [colId, setColId] = usePersistedState('col:edit-order:id', true);
+  const [colTarikh, setColTarikh] = usePersistedState('col:edit-order:tarikh', true);
+  const [colPembuat, setColPembuat] = usePersistedState('col:edit-order:pembuat', true);
+  const [colTempoh, setColTempoh] = usePersistedState('col:edit-order:tempoh', true);
+  const [colItem, setColItem] = usePersistedState('col:edit-order:item', true);
+  const [colAksi, setColAksi] = usePersistedState('col:edit-order:aksi', true);
 
-  const [colItemNama, setColItemNama] = useState(true);
-  const [colItemStok, setColItemStok] = useState(true);
-  const [colItemAwu, setColItemAwu] = useState(true);
-  const [colItemNota, setColItemNota] = useState(true);
+  const [colItemNama, setColItemNama] = usePersistedState('col:edit-order:modal-nama', true);
+  const [colItemStok, setColItemStok] = usePersistedState('col:edit-order:modal-stok', true);
+  const [colItemAwu, setColItemAwu] = usePersistedState('col:edit-order:modal-awu', true);
+  const [colItemNota, setColItemNota] = usePersistedState('col:edit-order:modal-nota', true);
 
   const fetchData = async () => {
     try {
-      const [ordersData, skusData, groupsData, settingsData] = await Promise.all([
+      const [ordersData, data] = await Promise.all([
         api.orders.list(),
-        api.skus.list(),
-        api.groups.list(),
-        api.settings.get(),
+        catalog.all(),
       ]);
       setOrders(ordersData);
-      setSkus(skusData);
-      setGroups(groupsData);
-      setSettings(settingsData);
+      setSkus(data.skus);
+      setGroups(data.groups);
+      setSettings(data.settings);
     } catch {
       showNotification({ title: 'Ralat', message: 'Gagal memuatkan data pesanan', color: 'red' });
     } finally {
@@ -362,14 +353,25 @@ export default function EditOrderPage() {
       showNotification({ title: 'Ralat', message: 'Tarikh diperlukan', color: 'red' });
       return;
     }
-    const items = editItems
-      .filter((it) => it.skuId !== null)
-      .map((it) => ({
-        skuId: it.skuId!,
-        kod: it.kod,
-        qtyOrdered: it.qtyOrdered,
-        notes: it.notes,
-      }));
+    // Rows added in the modal start empty; they used to be filtered out
+    // silently, so a save could succeed while discarding what the user typed
+    // (review #12). Block the save instead, and keep legacy items whose SKU
+    // link is null but which still carry a kod.
+    const empty = editItems.filter((it) => it.skuId === null && !it.kod.trim());
+    if (empty.length > 0) {
+      showNotification({
+        title: 'Ralat',
+        message: `Ada ${empty.length} baris tanpa SKU. Pilih SKU bagi baris tersebut atau padamnya.`,
+        color: 'red',
+      });
+      return;
+    }
+    const items = editItems.map((it) => ({
+      skuId: it.skuId,
+      kod: it.kod,
+      qtyOrdered: it.qtyOrdered,
+      notes: it.notes,
+    }));
 
     setSaving(true);
     try {
@@ -406,7 +408,16 @@ export default function EditOrderPage() {
     try {
       const fullOrder = await api.orders.get(order.id);
       const items = fullOrder.items || [];
-      const html = buildPrintHtml(fullOrder, items, skus, groups, 'Sistem Inventori Prabungkus Hospital Keningau', settings);
+      const html = buildPrintHtml(
+        fullOrder,
+        items,
+        skus,
+        groups,
+        // Dynamic app title (review #13) - the header used to be hardcoded,
+        // so renaming the app in Tetapan never reached the printed form.
+        settings?.appTitle || 'Sistem Inventori Prabungkus Hospital Keningau',
+        settings
+      );
       const w = window.open('', '_blank');
       if (w) {
         w.document.write(html);

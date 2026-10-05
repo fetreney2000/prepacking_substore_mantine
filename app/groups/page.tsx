@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { catalog, invalidateCatalog } from '@/lib/catalog';
+import { usePersistedState } from '@/lib/usePersistedState';
 import { Group, SKU } from '@/lib/types';
 import {
   Container,
@@ -35,17 +37,17 @@ export default function GroupsPage() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const [colId, setColId] = useState(true);
-  const [colNama, setColNama] = useState(true);
-  const [colNota, setColNota] = useState(true);
-  const [colSku, setColSku] = useState(true);
-  const [colAksi, setColAksi] = useState(true);
+  const [colId, setColId] = usePersistedState('col:groups:id', true);
+  const [colNama, setColNama] = usePersistedState('col:groups:nama', true);
+  const [colNota, setColNota] = usePersistedState('col:groups:nota', true);
+  const [colSku, setColSku] = usePersistedState('col:groups:sku', true);
+  const [colAksi, setColAksi] = usePersistedState('col:groups:aksi', true);
 
   const fetchData = async () => {
     try {
       const [groupsData, skusData] = await Promise.all([
-        api.groups.list(),
-        api.skus.list(),
+        catalog.groups(),
+        catalog.skus(),
       ]);
       setGroups(groupsData);
       setSkus(skusData);
@@ -109,6 +111,7 @@ export default function GroupsPage() {
         });
       }
       setModalOpen(false);
+      invalidateCatalog();
       fetchData();
     } catch {
       showNotification({
@@ -143,6 +146,7 @@ export default function GroupsPage() {
         color: 'green',
       });
       setDeleteModalOpen(false);
+      invalidateCatalog();
       fetchData();
     } catch {
       showNotification({

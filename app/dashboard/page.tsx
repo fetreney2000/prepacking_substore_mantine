@@ -23,7 +23,8 @@ import {
   IconAlertTriangle,
   IconAlertCircle,
 } from '@tabler/icons-react';
-import { api } from '@/lib/api';
+import { catalog } from '@/lib/catalog';
+import { usePersistedState } from '@/lib/usePersistedState';
 import {
   calculateLevels,
   determineStockStatus,
@@ -41,24 +42,20 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const [colKod, setColKod] = useState(true);
-  const [colNama, setColNama] = useState(true);
-  const [colKumpulan, setColKumpulan] = useState(true);
-  const [colStokSemasa, setColStokSemasa] = useState(true);
-  const [colMin, setColMin] = useState(true);
-  const [colStatus, setColStatus] = useState(true);
+  const [colKod, setColKod] = usePersistedState('col:dashboard:kod', true);
+  const [colNama, setColNama] = usePersistedState('col:dashboard:nama', true);
+  const [colKumpulan, setColKumpulan] = usePersistedState('col:dashboard:kumpulan', true);
+  const [colStokSemasa, setColStokSemasa] = usePersistedState('col:dashboard:stokSemasa', true);
+  const [colMin, setColMin] = usePersistedState('col:dashboard:min', true);
+  const [colStatus, setColStatus] = usePersistedState('col:dashboard:status', true);
 
   const fetchData = useCallback(async () => {
     setLoadError(null);
     try {
-      const [skusData, groupsData, settingsData] = await Promise.all([
-        api.skus.list(),
-        api.groups.list(),
-        api.settings.get(),
-      ]);
-      setSkus(skusData);
-      setGroups(groupsData);
-      setSettings(settingsData);
+      const data = await catalog.all();
+      setSkus(data.skus);
+      setGroups(data.groups);
+      setSettings(data.settings);
     } catch (err) {
       // This used to be console.error only, so a failed load looked like a
       // healthy dashboard full of zeros (review #14).

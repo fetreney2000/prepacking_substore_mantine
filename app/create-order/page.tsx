@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { memo, useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Paper,
   Group,
@@ -17,7 +17,10 @@ import {
   Center,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
+import { IconSearch } from '@tabler/icons-react';
 import { api } from '@/lib/api';
+import { catalog } from '@/lib/catalog';
+import { usePersistedState } from '@/lib/usePersistedState';
 import { calculateAWU, calculateOrderQty } from '@/lib/calculations';
 import { formatNum, localDateStr } from '@/lib/format';
 import { SKU } from '@/lib/types';
@@ -33,6 +36,70 @@ interface OrderRow {
   notes: string;
 }
 
+interface RowColumns {
+  kodNama: boolean;
+  awu: boolean;
+  stok: boolean;
+  qty: boolean;
+  notes: boolean;
+}
+
+/**
+ * One item row, memoised: editing a quantity updates only that row's object,
+ * so the other rows keep their identity and skip re-rendering. Without this,
+ * typing in one cell re-rendered every row in the table (review #21).
+ */
+const OrderRowView = memo(function OrderRowView({
+  row,
+  columns,
+  onQtyChange,
+  onNotesChange,
+}: {
+  row: OrderRow;
+  columns: RowColumns;
+  onQtyChange: (skuId: number, val: number | string) => void;
+  onNotesChange: (skuId: number, val: string) => void;
+}) {
+  return (
+    <Table.Tr>
+      {columns.kodNama && (
+        <Table.Td>
+          <Text size="sm">
+            <Text component="span" fw={600}>
+              {row.kod}
+            </Text>
+            {' — '}
+            {row.nama}
+          </Text>
+        </Table.Td>
+      )}
+      {columns.awu && <Table.Td ta="right">{formatNum(row.awu)}</Table.Td>}
+      {columns.stok && <Table.Td ta="right">{formatNum(row.stok)}</Table.Td>}
+      {columns.qty && (
+        <Table.Td ta="right">
+          <NumberInput
+            value={row.qty}
+            onChange={(val) => onQtyChange(row.skuId, val ?? 0)}
+            min={0}
+            step={1}
+            size="xs"
+            maw={100}
+          />
+        </Table.Td>
+      )}
+      {columns.notes && (
+        <Table.Td>
+          <TextInput
+            value={row.notes}
+            onChange={(e) => onNotesChange(row.skuId, e.currentTarget.value)}
+            size="xs"
+          />
+        </Table.Td>
+      )}
+    </Table.Tr>
+  );
+});
+
 /** Today's date in LOCAL time (see `localDateStr` — UTC showed yesterday). */
 function todayStr(): string {
   return localDateStr();
@@ -44,21 +111,42 @@ export default function CreateOrderPage() {
   const [saving, setSaving] = useState(false);
 
   const [tarikh, setTarikh] = useState(todayStr());
-  const [namaPembuat, setNamaPembuat] = useState('Ahmad Fetre');
+  const [namaPembuat, setNamaPembuat] = useState('');
   const [tempohMinggu, setTempohMinggu] = useState<number>(0);
   const [nota, setNota] = useState('');
   const [rows, setRows] = useState<OrderRow[]>([]);
 
-  const [colKodNama, setColKodNama] = useState(true);
-  const [colAwu, setColAwu] = useState(true);
-  const [colStok, setColStok] = useState(true);
-  const [colKuantiti, setColKuantiti] = useState(true);
-  const [colNota, setColNota] = useState(true);
+  const [colKodNama, setColKodNama] = usePersistedState('col:create-order:kod-nama', true);
+  const [colAwu, setColAwu] = usePersistedState('col:create-order:awu', true);
+  const [colStok, setColStok] = usePersistedState('col:create-order:stok', true);
+  const [colKuantiti, setColKuantiti] = usePersistedState('col:create-order:kuantiti', true);
+  const [colNota, setColNota] = usePersistedState('col:create-order:nota', true);
+  const [search, setSearch] = useState('');
+
+  // Remember the order creator on this machine instead of defaulting to a
+  // hardcoded name (review #31).
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem('namaPembuat');
+      if (saved) setNamaPembuat(saved);
+    } catch {
+      // storage unavailable; the field simply starts empty
+    }
+  }, []);
+
+  const handleNamaPembuatChange = (value: string) => {
+    setNamaPembuat(value);
+    try {
+      window.localStorage.setItem('namaPembuat', value);
+    } catch {
+      // remembering is a convenience, not a requirement
+    }
+  };
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await api.skus.list();
+        const data = await catalog.skus();
         const active = data.filter((s) => s.enabled);
         setSkus(active);
         setRows(
@@ -101,24 +189,28 @@ export default function CreateOrderPage() {
     recalcQty(weeks);
   };
 
-  const handleQtyChange = (skuId: number, val: number | string) => {
+  const handleQtyChange = useCallback((skuId: number, val: number | string) => {
     const qty = typeof val === 'number' ? val : parseInt(val) || 0;
-    setRows((prev) =>
-      prev.map((r) => (r.skuId === skuId ? { ...r, qty } : r))
-    );
-  };
+    setRows((prev) => prev.map((r) => (r.skuId === skuId ? { ...r, qty } : r)));
+  }, []);
 
-  const handleNotesChange = (skuId: number, val: string) => {
-    setRows((prev) =>
-      prev.map((r) => (r.skuId === skuId ? { ...r, notes: val } : r))
-    );
-  };
+  const handleNotesChange = useCallback((skuId: number, val: string) => {
+    setRows((prev) => prev.map((r) => (r.skuId === skuId ? { ...r, notes: val } : r)));
+  }, []);
 
   const handleSave = async () => {
     if (!tarikh) {
       showNotification({
         title: 'Ralat',
         message: 'Tarikh diperlukan',
+        color: 'red',
+      });
+      return;
+    }
+    if (!namaPembuat.trim()) {
+      showNotification({
+        title: 'Ralat',
+        message: 'Nama pembuat diperlukan',
         color: 'red',
       });
       return;
@@ -170,13 +262,34 @@ export default function CreateOrderPage() {
 
   const resetForm = () => {
     setTarikh(todayStr());
-    setNamaPembuat('Ahmad Fetre');
     setTempohMinggu(0);
     setNota('');
     setRows((prev) => prev.map((r) => ({ ...r, qty: 0, notes: '' })));
   };
 
   const totalQty = useMemo(() => rows.reduce((sum, r) => sum + r.qty, 0), [rows]);
+
+  // Stable identity so OrderRowView's memo actually holds (review #21).
+  const columns = useMemo<RowColumns>(
+    () => ({
+      kodNama: colKodNama,
+      awu: colAwu,
+      stok: colStok,
+      qty: colKuantiti,
+      notes: colNota,
+    }),
+    [colKodNama, colAwu, colStok, colKuantiti, colNota]
+  );
+
+  // Rendering is filtered, state is not: every SKU keeps its computed
+  // quantity and is still saved, whether or not it is currently on screen.
+  const visibleRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (r) => r.kod.toLowerCase().includes(q) || r.nama.toLowerCase().includes(q)
+    );
+  }, [rows, search]);
 
   if (loading) {
     return (
@@ -201,7 +314,7 @@ export default function CreateOrderPage() {
           <TextInput
             label="Nama Pembuat"
             value={namaPembuat}
-            onChange={(e) => setNamaPembuat(e.currentTarget.value)}
+            onChange={(e) => handleNamaPembuatChange(e.currentTarget.value)}
           />
           <NumberInput
             label="Tempoh Minggu"
@@ -222,7 +335,15 @@ export default function CreateOrderPage() {
           Item Pesanan
         </Title>
 
-        <Box mb="md">
+        <Group mb="md" align="flex-end">
+          <TextInput
+            label="Tapis item"
+            placeholder="Kod atau nama"
+            leftSection={<IconSearch size={16} />}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            style={{ flex: 1, minWidth: 240 }}
+          />
           <ColumnToggle columns={[
             { key: 'kodNama', label: 'Kod & Nama', visible: colKodNama, onChange: setColKodNama },
             { key: 'awu', label: 'AWU', visible: colAwu, onChange: setColAwu },
@@ -230,7 +351,7 @@ export default function CreateOrderPage() {
             { key: 'kuantiti', label: 'Kuantiti', visible: colKuantiti, onChange: setColKuantiti },
             { key: 'nota', label: 'Nota', visible: colNota, onChange: setColNota },
           ]} />
-        </Box>
+        </Group>
 
         <Box style={{ overflowX: 'auto' }}>
           <Table striped highlightOnHover verticalSpacing="sm">
@@ -244,49 +365,35 @@ export default function CreateOrderPage() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {rows.map((row) => (
-                <Table.Tr key={row.skuId}>
-                  {colKodNama && (
-                    <Table.Td>
-                      <Text size="sm">
-                        <Text component="span" fw={600}>
-                          {row.kod}
-                        </Text>
-                        {' — '}
-                        {row.nama}
-                      </Text>
-                    </Table.Td>
-                  )}
-                  {colAwu && <Table.Td ta="right">{formatNum(row.awu)}</Table.Td>}
-                  {colStok && <Table.Td ta="right">{formatNum(row.stok)}</Table.Td>}
-                  {colKuantiti && (
-                    <Table.Td ta="right">
-                      <NumberInput
-                        value={row.qty}
-                        onChange={(val) => handleQtyChange(row.skuId, val ?? 0)}
-                        min={0}
-                        step={1}
-                        size="xs"
-                        maw={100}
-                      />
-                    </Table.Td>
-                  )}
-                  {colNota && (
-                    <Table.Td>
-                      <TextInput
-                        value={row.notes}
-                        onChange={(e) =>
-                          handleNotesChange(row.skuId, e.currentTarget.value)
-                        }
-                        size="xs"
-                      />
-                    </Table.Td>
-                  )}
+              {visibleRows.length === 0 ? (
+                <Table.Tr>
+                  <Table.Td colSpan={Object.values(columns).filter(Boolean).length || 1}>
+                    <Text ta="center" c="dimmed" py="md">
+                      {rows.length === 0 ? 'Tiada SKU aktif untuk dipesan.' : 'Tiada item sepadan.'}
+                    </Text>
+                  </Table.Td>
                 </Table.Tr>
-              ))}
+              ) : (
+                visibleRows.map((row) => (
+                  <OrderRowView
+                    key={row.skuId}
+                    row={row}
+                    columns={columns}
+                    onQtyChange={handleQtyChange}
+                    onNotesChange={handleNotesChange}
+                  />
+                ))
+              )}
             </Table.Tbody>
           </Table>
         </Box>
+
+        {search.trim() !== '' && (
+          <Text size="sm" c="dimmed" mt="xs">
+            Menunjukkan {visibleRows.length} daripada {rows.length} item — item
+            lain kekal dikira dalam jumlah dan turut disimpan.
+          </Text>
+        )}
 
         <Divider my="md" />
 

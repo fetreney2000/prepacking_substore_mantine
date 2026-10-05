@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '@/lib/api';
+import { catalog, invalidateCatalog } from '@/lib/catalog';
+import { usePersistedState } from '@/lib/usePersistedState';
 import { calculateLevels, determineStockStatus, statusLabel, statusColor } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { SKU, Group, Settings } from '@/lib/types';
@@ -27,7 +29,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IconPlus, IconTrash, IconSearch } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconSearch, IconEdit } from '@tabler/icons-react';
 import ColumnToggle from '@/components/ColumnToggle';
 
 const emptyForm = {
@@ -64,27 +66,23 @@ export default function SKUsPage() {
   const [filterGroup, setFilterGroup] = useState<string | null>(null);
   const [activeOnly, setActiveOnly] = useState(false);
 
-  const [colKod, setColKod] = useState(true);
-  const [colNama, setColNama] = useState(true);
-  const [colKumpulan, setColKumpulan] = useState(true);
-  const [colStok, setColStok] = useState(true);
-  const [colAwu, setColAwu] = useState(false);
-  const [colMin, setColMin] = useState(false);
-  const [colPenimbal, setColPenimbal] = useState(false);
-  const [colMaks, setColMaks] = useState(true);
-  const [colStatus, setColStatus] = useState(false);
-  const [colAksi, setColAksi] = useState(true);
+  const [colKod, setColKod] = usePersistedState('col:skus:kod', true);
+  const [colNama, setColNama] = usePersistedState('col:skus:nama', true);
+  const [colKumpulan, setColKumpulan] = usePersistedState('col:skus:kumpulan', true);
+  const [colStok, setColStok] = usePersistedState('col:skus:stok', true);
+  const [colAwu, setColAwu] = usePersistedState('col:skus:awu', false);
+  const [colMin, setColMin] = usePersistedState('col:skus:min', false);
+  const [colPenimbal, setColPenimbal] = usePersistedState('col:skus:penimbal', false);
+  const [colMaks, setColMaks] = usePersistedState('col:skus:maks', true);
+  const [colStatus, setColStatus] = usePersistedState('col:skus:status', false);
+  const [colAksi, setColAksi] = usePersistedState('col:skus:aksi', true);
 
   const fetchData = async () => {
     try {
-      const [skusData, groupsData, settingsData] = await Promise.all([
-        api.skus.list(),
-        api.groups.list(),
-        api.settings.get(),
-      ]);
-      setSkus(skusData);
-      setGroups(groupsData);
-      setSettings(settingsData);
+      const data = await catalog.all();
+      setSkus(data.skus);
+      setGroups(data.groups);
+      setSettings(data.settings);
     } catch {
       showNotification({
         title: 'Ralat',
@@ -180,6 +178,7 @@ export default function SKUsPage() {
         showNotification({ title: 'Berjaya', message: 'SKU berjaya ditambah', color: 'green' });
       }
       setModalOpen(false);
+      invalidateCatalog();
       fetchData();
     } catch {
       showNotification({ title: 'Ralat', message: 'Gagal menyimpan SKU', color: 'red' });
@@ -194,6 +193,7 @@ export default function SKUsPage() {
       await api.skus.delete(deletingSKU.id);
       showNotification({ title: 'Berjaya', message: 'SKU berjaya dipadam', color: 'green' });
       setDeleteModalOpen(false);
+      invalidateCatalog();
       fetchData();
     } catch {
       showNotification({ title: 'Ralat', message: 'Gagal memadam SKU', color: 'red' });
@@ -228,19 +228,38 @@ export default function SKUsPage() {
           )}
           {colAksi && (
             <td>
-              <Tooltip label="Padam" position="top" withArrow>
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeletingSKU(sku);
-                    setDeleteModalOpen(true);
-                  }}
-                >
-                  <IconTrash size={16} />
-                </ActionIcon>
-              </Tooltip>
+              <MantineGroup gap="xs">
+                {/* Explicit button: the clickable row is unreachable by
+                    keyboard (review #25), so editing needs a focusable
+                    control - same pattern as the groups table. */}
+                <Tooltip label="Kemas kini" position="top" withArrow>
+                  <ActionIcon
+                    variant="subtle"
+                    color="blue"
+                    aria-label={`Kemas kini ${sku.kod}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenModal(sku);
+                    }}
+                  >
+                    <IconEdit size={16} />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label="Padam" position="top" withArrow>
+                  <ActionIcon
+                    variant="subtle"
+                    color="red"
+                    aria-label={`Padam ${sku.kod}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletingSKU(sku);
+                      setDeleteModalOpen(true);
+                    }}
+                  >
+                    <IconTrash size={16} />
+                  </ActionIcon>
+                </Tooltip>
+              </MantineGroup>
             </td>
           )}
         </tr>

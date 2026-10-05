@@ -11,6 +11,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { catalog } from '@/lib/catalog';
 
 const navItems = [
   { label: 'Papan Pemuka', href: '/dashboard', icon: IconDashboard },
@@ -42,7 +43,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    api.settings.get().then((settings) => {
+    catalog.settings().then((settings) => {
       setAppTitle(settings.appTitle || 'Sistem Inventori Farmasi');
     }).catch(() => {});
   }, []);
@@ -105,18 +106,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               const Icon = item.icon;
               const active = pathname === item.href;
               return (
-                <Link key={item.href} href={item.href} passHref>
-                  <NavLink
-                    leftSection={<Icon size={20} />}
-                    label={item.label}
-                    active={active}
-                    variant="subtle"
-                    color="blue"
-                    style={{
-                      borderRadius: 'var(--mantine-radius-md)',
-                    }}
-                  />
-                </Link>
+                <NavLink
+                  key={item.href}
+                  component={Link}
+                  href={item.href}
+                  leftSection={<Icon size={20} />}
+                  label={item.label}
+                  active={active}
+                  variant="subtle"
+                  color="blue"
+                  style={{
+                    borderRadius: 'var(--mantine-radius-md)',
+                  }}
+                />
               );
             })}
           </Stack>

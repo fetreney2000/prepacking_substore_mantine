@@ -21,6 +21,8 @@ import {
 } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { api } from '@/lib/api';
+import { catalog } from '@/lib/catalog';
+import { usePersistedState } from '@/lib/usePersistedState';
 import { formatNum } from '@/lib/format';
 import { SKU, Group as GroupType } from '@/lib/types';
 
@@ -48,19 +50,19 @@ export default function OrderReportPage() {
   const [reportRows, setReportRows] = useState<ReportRow[]>([]);
   const [hasGenerated, setHasGenerated] = useState(false);
 
-  const [colTarikh, setColTarikh] = useState(true);
-  const [colPembuat, setColPembuat] = useState(true);
-  const [colKod, setColKod] = useState(true);
-  const [colNama, setColNama] = useState(true);
-  const [colKumpulan, setColKumpulan] = useState(true);
-  const [colKuantiti, setColKuantiti] = useState(true);
+  const [colTarikh, setColTarikh] = usePersistedState('col:order-report:tarikh', true);
+  const [colPembuat, setColPembuat] = usePersistedState('col:order-report:pembuat', true);
+  const [colKod, setColKod] = usePersistedState('col:order-report:kod', true);
+  const [colNama, setColNama] = usePersistedState('col:order-report:nama', true);
+  const [colKumpulan, setColKumpulan] = usePersistedState('col:order-report:kumpulan', true);
+  const [colKuantiti, setColKuantiti] = usePersistedState('col:order-report:kuantiti', true);
 
   const loadData = useCallback(async () => {
     setLoadError(null);
     try {
       const [skusData, groupsData] = await Promise.all([
-        api.skus.list(),
-        api.groups.list(),
+        catalog.skus(),
+        catalog.groups(),
       ]);
       setSkus(skusData);
       setGroups(groupsData);
