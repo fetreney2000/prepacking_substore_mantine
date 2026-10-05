@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   SimpleGrid,
   Stack,
@@ -13,12 +13,15 @@ import {
   Loader,
   Center,
   Box,
+  Alert,
+  Button,
 } from '@mantine/core';
 import {
   IconPackage,
   IconUsers,
   IconChartBar,
   IconAlertTriangle,
+  IconAlertCircle,
 } from '@tabler/icons-react';
 import { api } from '@/lib/api';
 import {
@@ -36,6 +39,7 @@ export default function DashboardPage() {
   const [groups, setGroups] = useState<GroupType[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [colKod, setColKod] = useState(true);
   const [colNama, setColNama] = useState(true);
@@ -44,31 +48,58 @@ export default function DashboardPage() {
   const [colMin, setColMin] = useState(true);
   const [colStatus, setColStatus] = useState(true);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const [skusData, groupsData, settingsData] = await Promise.all([
-          api.skus.list(),
-          api.groups.list(),
-          api.settings.get(),
-        ]);
-        setSkus(skusData);
-        setGroups(groupsData);
-        setSettings(settingsData);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchData = useCallback(async () => {
+    setLoadError(null);
+    try {
+      const [skusData, groupsData, settingsData] = await Promise.all([
+        api.skus.list(),
+        api.groups.list(),
+        api.settings.get(),
+      ]);
+      setSkus(skusData);
+      setGroups(groupsData);
+      setSettings(settingsData);
+    } catch (err) {
+      // This used to be console.error only, so a failed load looked like a
+      // healthy dashboard full of zeros (review #14).
+      setLoadError(
+        err instanceof Error && err.message ? err.message : 'Gagal memuatkan data papan pemuka.'
+      );
+    } finally {
+      setLoading(false);
     }
-    fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (loading) {
     return (
       <Center h="100vh">
         <Loader size="lg" />
       </Center>
+    );
+  }
+
+  // Fail loudly: zeros and "no low stock items" would be wrong, not empty.
+  if (loadError) {
+    return (
+      <Stack gap="lg">
+        <Title order={2}>Papan Pemuka</Title>
+        <Alert
+          color="red"
+          icon={<IconAlertCircle size={16} />}
+          title="Gagal memuatkan data"
+        >
+          <Group justify="space-between" align="center" gap="sm">
+            <Text size="sm">{loadError}</Text>
+            <Button size="xs" variant="light" onClick={fetchData}>
+              Cuba semula
+            </Button>
+          </Group>
+        </Alert>
+      </Stack>
     );
   }
 

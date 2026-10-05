@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Container,
   Title,
@@ -17,7 +17,9 @@ import {
   Divider,
   Loader,
   Center,
+  Alert,
 } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { api } from '@/lib/api';
 import { formatNum } from '@/lib/format';
 import { SKU, Group as GroupType } from '@/lib/types';
@@ -36,6 +38,7 @@ export default function OrderReportPage() {
   const [groups, setGroups] = useState<GroupType[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -52,23 +55,27 @@ export default function OrderReportPage() {
   const [colKumpulan, setColKumpulan] = useState(true);
   const [colKuantiti, setColKuantiti] = useState(true);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const [skusData, groupsData] = await Promise.all([
-          api.skus.list(),
-          api.groups.list(),
-        ]);
-        setSkus(skusData);
-        setGroups(groupsData);
-      } catch {
-        // silent
-      } finally {
-        setLoadingData(false);
-      }
+  const loadData = useCallback(async () => {
+    setLoadError(null);
+    try {
+      const [skusData, groupsData] = await Promise.all([
+        api.skus.list(),
+        api.groups.list(),
+      ]);
+      setSkus(skusData);
+      setGroups(groupsData);
+    } catch (err) {
+      setLoadError(
+        err instanceof Error && err.message ? err.message : 'Gagal memuatkan senarai SKU dan kumpulan.'
+      );
+    } finally {
+      setLoadingData(false);
     }
-    load();
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const skuOptions = useMemo(
     () => skus.map((s) => ({ value: String(s.id), label: `${s.kod} - ${s.nama}` })),
@@ -83,6 +90,7 @@ export default function OrderReportPage() {
 
   const handleGenerate = async () => {
     setGenerating(true);
+    setLoadError(null);
     setReportRows([]);
     setHasGenerated(true);
 
@@ -121,8 +129,14 @@ export default function OrderReportPage() {
 
       rows.sort((a, b) => a.tarikh.localeCompare(b.tarikh));
       setReportRows(rows);
-    } catch {
-      // silent
+    } catch (err) {
+      // This used to be swallowed, so a failed request rendered as
+      // "Tiada rekod ditemui" — indistinguishable from a genuinely empty
+      // report (review #14). Show why it failed instead.
+      setLoadError(
+        err instanceof Error && err.message ? err.message : 'Gagal menjana laporan.'
+      );
+      setHasGenerated(false);
     } finally {
       setGenerating(false);
     }
@@ -141,6 +155,22 @@ export default function OrderReportPage() {
       <Title order={2} mb="lg">
         Laporan Pesanan
       </Title>
+
+      {loadError && (
+        <Alert
+          color="red"
+          icon={<IconAlertCircle size={16} />}
+          title="Gagal memuatkan data"
+          mb="lg"
+        >
+          <Group justify="space-between" align="center" gap="sm">
+            <Text size="sm">{loadError}</Text>
+            <Button size="xs" variant="light" onClick={loadData}>
+              Cuba semula
+            </Button>
+          </Group>
+        </Alert>
+      )}
 
       <Paper withBorder p="md" mb="lg">
         <Stack gap="md">
