@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { escapeHtml } from './print';
+import { PRINT_TOGGLE_STYLE, buildPrintToggleBar, escapeHtml } from './print';
 
 describe('escapeHtml', () => {
   it('neutralises script and style breakouts', () => {
@@ -62,5 +62,50 @@ describe('escapeHtml', () => {
     for (const input of hostile) {
       expect(escapeHtml(input)).not.toMatch(/[<>]/);
     }
+  });
+});
+
+describe('buildPrintToggleBar', () => {
+  it('emits the exact wiring the print popups relied on', () => {
+    const html = buildPrintToggleBar([{ label: 'Kod', selectors: ['.pc-kod'] }]);
+    expect(html).toContain('<div class="col-toggle-bar">');
+    expect(html).toContain(
+      `onclick="var c=this.querySelector('input');c.checked=!c.checked;` +
+        `document.querySelectorAll('.pc-kod').forEach(function(el){el.classList.toggle('col-hidden',!c.checked)})"`
+    );
+    expect(html).toContain('<input type="checkbox" checked>');
+    expect(html).toContain('<span class="toggle-label">Kod</span>');
+    expect(html).toContain('</div>');
+  });
+
+  it('joins several selectors into one switch', () => {
+    const html = buildPrintToggleBar([
+      { label: 'Min/Penimbal/Maks', selectors: ['.pc-min', '.pc-penimbal', '.pc-maks'] },
+    ]);
+    expect(html).toContain("querySelectorAll('.pc-min,.pc-penimbal,.pc-maks')");
+  });
+
+  it('builds one label per toggle', () => {
+    const html = buildPrintToggleBar([
+      { label: 'A', selectors: ['.a'] },
+      { label: 'B', selectors: ['.b'] },
+      { label: 'C', selectors: ['.c'] },
+    ]);
+    expect((html.match(/<label /g) ?? []).length).toBe(3);
+  });
+
+  it('escapes the caption', () => {
+    const html = buildPrintToggleBar([{ label: '<b>x</b>', selectors: ['.a'] }]);
+    expect(html).toContain('&lt;b&gt;x&lt;/b&gt;');
+    expect(html).not.toContain('<b>x</b>');
+  });
+});
+
+describe('PRINT_TOGGLE_STYLE', () => {
+  it('keeps the toggle bar out of the printed output', () => {
+    expect(PRINT_TOGGLE_STYLE).toContain('.col-toggle-bar{display:flex');
+    expect(PRINT_TOGGLE_STYLE).toContain('@media print');
+    expect(PRINT_TOGGLE_STYLE).toContain('.col-hidden,.col-hidden *{display:none!important}');
+    expect(PRINT_TOGGLE_STYLE.length).toBeGreaterThan(500);
   });
 });

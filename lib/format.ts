@@ -1,7 +1,12 @@
-export function formatNum(n: number | undefined | null): string {
-  return Number(n || 0).toLocaleString('ms-MY');
-}
+/**
+ * One formatter for the whole app: `toLocaleString` was allocating a fresh
+ * Intl object for every table cell (review item #28).
+ */
+const numberFormatter = new Intl.NumberFormat('ms-MY');
 
+export function formatNum(n: number | undefined | null): string {
+  return numberFormatter.format(Number(n || 0));
+}
 /**
  * `YYYY-MM-DD` in the browser's LOCAL time.
  *
