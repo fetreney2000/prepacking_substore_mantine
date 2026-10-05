@@ -51,12 +51,13 @@ export default function HelpPage() {
             </Group>
           </Title>
           <Text>
-            Papan pemuka menunjukkan ringkasan inventori semasa. Ia memaparkan jumlah SKU aktif, 
-            jumlah stok semasa, nilai inventori, dan item yang memerlukan perhatian. Anda boleh 
-            menapis data mengikut kumpulan dan mencari SKU tertentu.
+            Papan pemuka menunjukkan ringkasan inventori semasa: jumlah SKU aktif, bilangan
+            kumpulan, jumlah stok semasa dan bilangan item pada paras stok rendah atau
+            kritikal. Di bawah ringkasan, senarai item stok rendah dan kehabisan stok
+            dipaparkan beserta status masing-masing.
           </Text>
           <Text>
-            Klik pada mana-mana item dalam senarai untuk melihat butiran lanjut atau mengedit maklumat stok.
+            Untuk mencari, menapis atau mengedit item, gunakan halaman Pengurusan Item.
           </Text>
 
           <Divider />
@@ -72,12 +73,14 @@ export default function HelpPage() {
             mempunyai SKU unik. Anda boleh menambah, mengedit, dan memadam SKU.
           </Text>
           <List>
-            <List.Item>Nama SKU: Nama pendek item</List.Item>
-            <List.Item>Deskripsi: Penerangan lengkap item</List.Item>
+            <List.Item>Kod: Kod item - mesti unik, dan dipadankan dengan fail Excel stok</List.Item>
+            <List.Item>Nama: Nama item</List.Item>
+            <List.Item>Saiz Pek: Kuantiti setiap pembungkusan; paras stok dibulatkan ke atas ke saiz pek ini</List.Item>
             <List.Item>Kumpulan: Kategori item</List.Item>
-            <List.Item>Unit: Unit pengukuran (cth: tablet, ml, kotak)</List.Item>
             <List.Item>Stok Semasa: Kuantiti stok pada masa ini</List.Item>
-            <List.Item>Purata Mingguan: Purata penggunaan setiap minggu</List.Item>
+            <List.Item>Penggunaan Bulanan: Penggunaan tiga bulan terakhir - asas kepada purata mingguan (AWU)</List.Item>
+            <List.Item>Nota: Sebarang catatan tambahan</List.Item>
+            <List.Item>Guna Tahap Manual: Tetapkan minimum, penimbal dan maksimum sendiri</List.Item>
           </List>
 
           <Divider />
@@ -106,14 +109,16 @@ export default function HelpPage() {
             Untuk mencipta pesanan baru:
           </Text>
           <List type="ordered">
-            <List.Item>Pilih kumpulan yang dikehendaki</List.Item>
-            <List.Item>Pilih minggu permulaan dan minggu tamat</List.Item>
-            <List.Item>Sistem akan mengira keperluan stok secara automatik</List.Item>
-            <List.Item>Semak senarai item yang perlu dipesan</List.Item>
-            <List.Item>Simpan atau cetak pesanan</List.Item>
+            <List.Item>Masukkan tarikh, nama pembuat dan tempoh (bilangan minggu)</List.Item>
+            <List.Item>Tapis item mengikut kod atau nama jika senarai panjang</List.Item>
+            <List.Item>Sistem mengira keperluan stok secara automatik bagi setiap item</List.Item>
+            <List.Item>Semak dan laraskan kuantiti serta nota item yang perlu dipesan</List.Item>
+            <List.Item>Klik Simpan Pesanan</List.Item>
           </List>
           <Text>
-            Pesanan akan dikira berdasarkan purata penggunaan mingguan dan tempoh yang dipilih.
+            Pesanan dikira berdasarkan purata penggunaan mingguan (AWU) daripada tiga bulan
+            penggunaan terakhir, ditolak stok semasa, dan dibulatkan ke atas ke saiz pek.
+            Cetakan borang permohonan terdapat pada halaman Senarai Pesanan.
           </Text>
 
           <Divider />
@@ -125,9 +130,9 @@ export default function HelpPage() {
             </Group>
           </Title>
           <Text>
-            Anda boleh mengedit pesanan yang sedia ada. Pilih pesanan daripada senarai, 
-            kemudian ubah kuantiti atau item mengikut keperluan. Perubahan akan disimpan 
-            secara automatik.
+            Anda boleh mengedit pesanan yang sedia ada. Pilih pesanan daripada senarai,
+            kemudian ubah kuantiti atau item mengikut keperluan. Perubahan hanya disimpan
+            setelah anda menekan butang Simpan.
           </Text>
 
           <Divider />
@@ -139,9 +144,9 @@ export default function HelpPage() {
             </Group>
           </Title>
           <Text>
-            Laporan pesanan menunjukkan senarai semua pesanan yang telah dibuat. Anda boleh 
-            menapis mengikut tarikh, kumpulan, dan status. Laporan boleh dieksport ke format 
-            Excel atau PDF.
+            Laporan pesanan menunjukkan semua item yang telah dipesan merentas semua
+            pesanan. Anda boleh menapis mengikut tarikh, nama pembuat dan SKU, serta
+            memilih kolum yang dipaparkan sebelum dicetak melalui pelayar.
           </Text>
 
           <Divider />
@@ -149,13 +154,13 @@ export default function HelpPage() {
           <Title order={4}>
             <Group gap="xs">
               <IconReport size={20} />
-              <span>Laporan SKU</span>
+              <span>Laporan Item</span>
             </Group>
           </Title>
           <Text>
-            Laporan SKU memberikan gambaran keseluruhan stok setiap item. Ia menunjukkan 
-            stok semasa, purata penggunaan, dan ramalan keperluan masa depan. Laporan ini 
-            membantu dalam membuat keputusan pembelian.
+            Laporan Item memberikan gambaran keseluruhan stok setiap item: stok semasa,
+            AWU, paras minimum, penimbal dan maksimum, bilangan minggu stok serta status
+            stok. Ia boleh ditapis mengikut status dan dicetak terus daripada halaman.
           </Text>
 
           <Divider />
@@ -167,35 +172,44 @@ export default function HelpPage() {
             </Group>
           </Title>
           <Text>
-            Sistem mengira keperluan stok berdasarkan formula berikut:
+            AWU (purata penggunaan mingguan) dikira daripada purata penggunaan tiga bulan
+            terakhir bahagi 4.33 minggu. Sistem kemudian mengira:
           </Text>
           <List>
             <List.Item>
-              <Text fw={600}>Minimum Mingguan:</Text> Purata penggunaan × Minimum Minggu
+              <Text fw={600}>Minimum:</Text> AWU x Minimum Minggu
             </List.Item>
             <List.Item>
-              <Text fw={600}>Minggu Beza:</Text> Tambahan untuk menghadapi turun naik permintaan
+              <Text fw={600}>Penimbal:</Text> AWU x Minggu Beza (paras amaran sebelum kritikal)
             </List.Item>
             <List.Item>
-              <Text fw={600}>Maksimum Mingguan:</Text> Had atas untuk mengelakkan lebihan stok
+              <Text fw={600}>Maksimum:</Text> AWU x Maksimum Minggu
             </List.Item>
+            <List.Item>Setiap paras dibulatkan ke atas ke kelipatan Saiz Pek, kecuali tahap manual dipilih</List.Item>
           </List>
 
           <Divider />
 
           <Title order={4}>Status Stok</Title>
           <Text>
-            Status stok ditentukan oleh perbandingan antara stok semasa dan paras minimum:
+            Status stok ditentukan oleh perbandingan antara stok semasa dengan paras minimum
+            dan penimbal:
           </Text>
           <List>
             <List.Item>
-              <Text fw={600} c="green">Stok Mencukupi:</Text> Stok semasa melebihi minimum mingguan
+              <Text fw={600} c="green">OK:</Text> Stok pada atau melebihi paras penimbal
             </List.Item>
             <List.Item>
-              <Text fw={600} c="yellow">Stok Rendah:</Text> Stok semasa berhampiran minimum mingguan
+              <Text fw={600} c="yellow">Rendah:</Text> Stok di antara paras minimum dan penimbal
             </List.Item>
             <List.Item>
-              <Text fw={600} c="red">Stok Kritikal:</Text> Stok semasa di bawah minimum mingguan
+              <Text fw={600} c="red">Kritikal:</Text> Stok pada atau di bawah paras minimum
+            </List.Item>
+            <List.Item>
+              <Text fw={600} c="gray">Kehabisan:</Text> Stok sifar
+            </List.Item>
+            <List.Item>
+              <Text fw={600} c="gray">Dinyahaktif:</Text> Item tidak dikira dan tidak dipesan
             </List.Item>
           </List>
 
@@ -216,6 +230,7 @@ export default function HelpPage() {
             <List.Item>Minggu Beza: Tambahan untuk turun naik permintaan</List.Item>
             <List.Item>Maksimum Minggu: Had atas pengiraan stok</List.Item>
             <List.Item>Nama Fail Lalai: Nama fail untuk eksport</List.Item>
+            <List.Item>Nilai minggu mesti: Minimum Minggu &#8804; Minggu Beza &#8804; Maksimum Minggu</List.Item>
 
           </List>
 
@@ -235,10 +250,13 @@ export default function HelpPage() {
               <Text fw={600}>Eksport JSON:</Text> Muat turun semua data sebagai sandaran
             </List.Item>
             <List.Item>
-              <Text fw={600}>Import JSON:</Text> Pulihkan data daripada sandaran
+              <Text fw={600}>Import JSON:</Text> Menimpa kesemua data dengan isi sandaran.
+              Sandaran data semasa dimuat turun secara automatik sebelum import, dan tiada
+              perubahan dibuat jika mana-mana rekod tidak sah.
             </List.Item>
             <List.Item>
-              <Text fw={600}>Import Excel:</Text> Import data daripada fail Excel
+              <Text fw={600}>Import Excel:</Text> Mengemas kini stok semasa mengikut padanan
+              kod. Baris tanpa padanan atau kuantiti tidak sah dilaporkan dan tidak ditulis.
             </List.Item>
           </List>
 
@@ -270,7 +288,6 @@ export default function HelpPage() {
           </Text>
           <List>
             <List.Item>Reka bentuk responsif yang menyesuaikan saiz skrin</List.Item>
-            <List.Item>Navigasi mudah dengan menu burgher</List.Item>
             <List.Item>Sokongan skrin sentuh</List.Item>
             <List.Item>Paparan kad untuk pandangan ringkas</List.Item>
           </List>
@@ -284,20 +301,14 @@ export default function HelpPage() {
             </Group>
           </Title>
           <Text>
-            Pintasan papan kekunci tersedia untuk tindakan biasa:
+            Aplikasi ini tidak menetapkan pintasan khas; pintasan pelayar berikut berguna:
           </Text>
           <List>
             <List.Item>
-              <Text fw={600}>Ctrl + S:</Text> Simpan semula
+              <Text fw={600}>Escape:</Text> Tutup modal atau dialog
             </List.Item>
             <List.Item>
-              <Text fw={600}>Ctrl + F:</Text> Cari
-            </List.Item>
-            <List.Item>
-              <Text fw={600}>Ctrl + P:</Text> Cetak
-            </List.Item>
-            <List.Item>
-              <Text fw={600}>Escape:</Text> Tutup tetingkap atau dialog
+              <Text fw={600}>Ctrl + P:</Text> Cetak halaman melalui pelayar
             </List.Item>
           </List>
         </Stack>
