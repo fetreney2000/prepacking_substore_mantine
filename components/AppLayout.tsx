@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { catalog } from '@/lib/catalog';
+import ColorSchemeToggle from './ColorSchemeToggle';
 
 const navItems = [
   { label: 'Papan Pemuka', href: '/dashboard', icon: IconDashboard },
@@ -95,6 +96,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <IconLogout size={18} />
               </ActionIcon>
             </Tooltip>
+            {/* Far right of the header: manual light/dark switch (the scheme
+                still follows the OS until this is pressed once). */}
+            <ColorSchemeToggle />
           </Group>
         </Group>
       </AppShell.Header>

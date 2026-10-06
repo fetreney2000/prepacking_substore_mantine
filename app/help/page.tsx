@@ -23,6 +23,7 @@ import {
   IconTable,
   IconDeviceMobile,
   IconKeyboard,
+  IconSunMoon,
 } from '@tabler/icons-react';
 import StatusBadge from '@/components/StatusBadge';
 
@@ -306,6 +307,29 @@ export default function HelpPage() {
             <List.Item>Reka bentuk responsif yang menyesuaikan saiz skrin</List.Item>
             <List.Item>Sokongan skrin sentuh</List.Item>
             <List.Item>Paparan kad untuk pandangan ringkas</List.Item>
+          </List>
+
+          <Divider />
+
+          <Title order={3}>
+            <Group gap="xs">
+              <IconSunMoon size={20} />
+              <span>Mod Cerah dan Gelap</span>
+            </Group>
+          </Title>
+          <Text>
+            Secara lalau aplikasi mengikut tema sistem. Untuk memaksa pilihan
+            sendiri:
+          </Text>
+          <List>
+            <List.Item>
+              Klik butang di hujung kanan pengepala untuk bertukar antara mod
+              cerah dan mod gelap
+            </List.Item>
+            <List.Item>
+              Pilihan disimpan pada pelayar ini dan digunakan semula pada
+              lawatan seterusnya
+            </List.Item>
           </List>
 
           <Divider />

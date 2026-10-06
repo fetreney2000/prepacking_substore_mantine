@@ -202,9 +202,14 @@ in `app/layout.tsx`, so the scheme follows the OS and is applied before first
 paint (no white flash on a dark-mode machine). Every pair this document
 measures was re-checked per scheme — the badge numbers are in §3, and the two
 light-only rules found in `globals.css` (solid `gray-1` code chips, `gray-0`
-scrollbar track) now use translucent/body tokens. A manual toggle would be
-`forceColorScheme` + `usePersistedState` if staff ever ask for one; print
-popups stay light-on-paper by design.
+scrollbar track) now use translucent/body tokens. A manual toggle now ships:
+`components/ColorSchemeToggle.tsx`, the right-most control in the header,
+calls `useMantineColorScheme().toggleColorScheme()` — which flips the
+*computed* scheme (the OS value while on auto) and persists it through
+Mantine's localStorage scheme manager, the same key `ColorSchemeScript` reads
+before paint, so a chosen scheme survives reloads with no flash. Returning to
+OS-following means clearing that key (Mantine's `clearColorScheme()`); there
+is no UI for it unless staff ask. Print popups stay light-on-paper by design.
 
 Do **not** hardcode hex in components (including the print popups, which should
 keep using their own checked palette for paper output).
@@ -219,11 +224,14 @@ keep using their own checked palette for paper output).
   on table cells containing quantities. Without it, columns of numbers shimmer
   as digits change — this is the single cheapest "looks professional" win for a
   stock system.
-- **Heading hierarchy.** *Verified in this codebase:* pages use `Title order={2}`
-  (12×) and `order={4}` (20×) but `order={3}` only 2× — `create-order`,
-  `dashboard`, `help` and `sync` skip h2 → h4. Screen-reader heading navigation
-  breaks (1.3.1) and it reads as unfinished. Rule: page title `order={2}`,
-  section title `order={3}`, never skip a level.
+- **Heading hierarchy.** *Found during review (item 2, now fixed):* pages used
+  `Title order={2}` (12×) and `order={4}` (20×) but `order={3}` only 2× —
+  `create-order`, `dashboard`, `help` and `sync` skipped h2 → h4, which breaks
+  screen-reader heading navigation (1.3.1) and reads as unfinished. Rule: page
+  title `order={2}`, section title `order={3}`, never skip a level. Source now
+  holds `order={2}` ×17 (each loading state carries its own page title so the
+  skeleton screen keeps the heading — only one branch ever renders),
+  `order={3}` ×23, `order={4}` ×0.
 - **Spacing:** use `spacing` tokens (`xs 4 / sm 8 / md 16 / lg 24 / xl 32`)
   rather than magic numbers; one vertical rhythm per page (`Stack gap="lg"`).
 - **Table density:** one `verticalSpacing` for data tables; numbers right-
@@ -299,9 +307,12 @@ keep using their own checked palette for paper output).
 
 - [ ] `npm run lint` · `npx tsc --noEmit` · `npm test` · `npm run build` all green
 - [ ] Contrast: status badges, links, dimmed text, focus ring ≥4.5:1 / 3:1
-      — in **both** colour schemes (toggle the OS setting; §3 has the numbers)
+      — in **both** colour schemes (toggle the OS setting or the header
+      switch; §3 has the numbers)
 - [ ] Keyboard-only pass on every page (login → dashboard → form → save),
       including `/` focusing search on the three pages that have it
+- [ ] Header theme toggle: switches scheme, `aria-label` names the target
+      scheme, choice persists across reload
 - [ ] Icon-button targets ≥24×24
 - [ ] Loading / empty / error states all reachable and distinguishable
 - [ ] Destructive actions confirm; import takes a pre-import backup
@@ -319,7 +330,7 @@ keep using their own checked palette for paper output).
 | # | Item | Evidence |
 |---|---|---|
 | ✅ 1 | Status badge contrast: 1.75–3.01:1 (Mantine default) → **18.7–19.7:1 light / 6.9–7.8:1 dark** | `components/StatusBadge.tsx` (single rule, used by dashboard, skus, sku-report and help) + `StatusBadge.test.ts`; print ink fixed in `app/sku-report` — both schemes measured in §3 (earlier light-only numbers were corrected there when the tint alpha was re-derived) |
-| ✅ 2 | Heading skips (h2 → h4) | now `order={2}` ×12, `order={3}` ×22, `order={4}` ×0 — no page skips a level; verified in rendered HTML |
+| ✅ 2 | Heading skips (h2 → h4) | now `order={2}` ×17 (loading-state titles included; one branch renders at a time), `order={3}` ×23, `order={4}` ×0 — no page skips a level; verified in rendered HTML |
 | ✅ 3 | `font-variant-numeric: tabular-nums` on `.mantine-Table-table td` | present in the built CSS |
 | ✅ 4 | `autoContrast: true` + `respectReducedMotion: true` in `createTheme` | both present in the client bundle |
 | ✅ 5 | Icon-button target-size audit | §7 — ActionIcon 28px, inputs 30px, Switch 32×16 via the spacing exception |
@@ -332,7 +343,7 @@ keep using their own checked palette for paper output).
 | ✅ 7 | Sticky table headers | `.table-scroll` on all 8 table wrappers: 70vh cap + sticky opaque `thead th` (border redrawn as an inset shadow, since a collapsed border does not travel with a sticky cell), all dropped for print — §7, §8 |
 | ✅ 8 | Semantic status palette | `STOCK_STATUS` in `lib/calculations.ts`: one row per status (`label`, `color`, `printBg`) feeding `statusColor()`/`statusLabel()`, `StatusBadge` and the print background (+3 tests) — §5 |
 | ✅ 9 | Keyboard accelerator, implemented *then* documented | `lib/useSlashToFocus.ts` (`/` → focus search, ignores fields already focused, `preventDefault` vs Firefox quick-find) on skus / create-order / edit-order via `data-search-input`; the help page documents exactly this one shortcut |
-| ✅ 10 | Dark mode with per-scheme re-measurement | `ColorSchemeScript` + `defaultColorScheme="auto"` (follows the OS, no flash); badge ink re-measured per scheme and switched to `--mantine-color-text` (§3: 18.7–19.7:1 light, 6.9–7.8:1 dark); two light-only CSS rules fixed (code chip, scrollbar track) |
+| ✅ 10 | Dark mode with per-scheme re-measurement | `ColorSchemeScript` + `defaultColorScheme="auto"` (follows the OS, no flash); badge ink re-measured per scheme and switched to `--mantine-color-text` (§3: 18.7–19.7:1 light, 6.9–7.8:1 dark); two light-only CSS rules fixed (code chip, scrollbar track); manual header toggle (`components/ColorSchemeToggle.tsx`) persists via Mantine's scheme manager — §5 |
 
 **Remaining:** none open. The one optional extra from item 10 — a manual
 scheme toggle instead of OS-following — is written up in §5 if staff ask for
