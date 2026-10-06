@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  STOCK_STATUS,
   calculateAWU,
   calculateLevels,
   calculateOrderQty,
@@ -273,5 +274,31 @@ describe('calculateOrderQty', () => {
     const s = sku({ usageMonth1: 43.3, usageMonth2: 43.3, usageMonth3: 43.3, saizPek: 0 });
     delete (s as Partial<SKU>).stokSemasa;
     expect(calculateOrderQty(s, 4)).toBe(40);
+  });
+});
+
+describe('STOCK_STATUS palette', () => {
+  const ALL = ['ok', 'low', 'critical', 'out', 'disabled'] as const;
+
+  it('defines a label, an on-screen colour and a print background for every status', () => {
+    for (const status of ALL) {
+      const meta = STOCK_STATUS[status];
+      expect(meta?.label).toBeTruthy();
+      expect(meta?.color).toBeTruthy();
+      expect(meta?.printBg).toMatch(/^#[0-9a-f]{6}$/i);
+    }
+    expect(Object.keys(STOCK_STATUS).sort()).toEqual([...ALL].sort());
+  });
+
+  it('statusLabel and statusColor read from the palette', () => {
+    for (const status of ALL) {
+      expect(statusLabel(status)).toBe(STOCK_STATUS[status].label);
+      expect(statusColor(status)).toBe(STOCK_STATUS[status].color);
+    }
+  });
+
+  it('screen and paper stay in sync: shared colours for out and disabled', () => {
+    expect(STOCK_STATUS.out.color).toBe(STOCK_STATUS.disabled.color);
+    expect(STOCK_STATUS.out.printBg).toBe(STOCK_STATUS.disabled.printBg);
   });
 });

@@ -13,18 +13,18 @@ import {
   Table,
   Box,
   Divider,
-  Loader,
-  Center,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconSearch } from '@tabler/icons-react';
 import { api } from '@/lib/api';
 import { catalog } from '@/lib/catalog';
 import { usePersistedState } from '@/lib/usePersistedState';
+import { useSlashToFocus } from '@/lib/useSlashToFocus';
 import { calculateAWU, calculateOrderQty } from '@/lib/calculations';
 import { formatNum, localDateStr } from '@/lib/format';
 import { SKU } from '@/lib/types';
 import ColumnToggle from '@/components/ColumnToggle';
+import TableSkeleton from '@/components/Skeletons';
 
 interface OrderRow {
   skuId: number;
@@ -122,6 +122,9 @@ export default function CreateOrderPage() {
   const [colKuantiti, setColKuantiti] = usePersistedState('col:create-order:kuantiti', true);
   const [colNota, setColNota] = usePersistedState('col:create-order:nota', true);
   const [search, setSearch] = useState('');
+
+  // `/` jumps straight to the "Tapis item" box (review #9).
+  useSlashToFocus();
 
   // Remember the order creator on this machine instead of defaulting to a
   // hardcoded name (review #31).
@@ -293,9 +296,10 @@ export default function CreateOrderPage() {
 
   if (loading) {
     return (
-      <Center h="60vh">
-        <Loader size="lg" />
-      </Center>
+      <Stack gap="lg">
+        <Title order={2}>Cipta Pesanan Baru</Title>
+        <TableSkeleton rows={8} columns={5} />
+      </Stack>
     );
   }
 
@@ -339,6 +343,7 @@ export default function CreateOrderPage() {
           <TextInput
             label="Tapis item"
             placeholder="Kod atau nama"
+            data-search-input="true"
             leftSection={<IconSearch size={16} />}
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
@@ -353,7 +358,7 @@ export default function CreateOrderPage() {
           ]} />
         </Group>
 
-        <Box style={{ overflowX: 'auto' }}>
+        <Box className="table-scroll">
           <Table striped highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>

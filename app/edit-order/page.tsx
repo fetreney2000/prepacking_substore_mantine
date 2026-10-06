@@ -13,8 +13,6 @@ import {
   Table,
   Box,
   Divider,
-  Loader,
-  Center,
   Modal,
   Select,
   ActionIcon,
@@ -25,11 +23,13 @@ import { IconSearch, IconPrinter, IconEdit, IconTrash, IconPlus } from '@tabler/
 import { api } from '@/lib/api';
 import { catalog } from '@/lib/catalog';
 import { usePersistedState } from '@/lib/usePersistedState';
+import { useSlashToFocus } from '@/lib/useSlashToFocus';
 import { calculateOrderQty, calculateAWU, calculateLevels, determineStockStatus, statusLabel } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { escapeHtml, PRINT_TOGGLE_STYLE, buildPrintToggleBar } from '@/lib/print';
 import { SKU, Order, OrderItem, Settings } from '@/lib/types';
 import ColumnToggle from '@/components/ColumnToggle';
+import TableSkeleton from '@/components/Skeletons';
 
 interface EditItem {
   skuId: number | null;
@@ -233,6 +233,9 @@ export default function EditOrderPage() {
   const [colItemAwu, setColItemAwu] = usePersistedState('col:edit-order:modal-awu', true);
   const [colItemNota, setColItemNota] = usePersistedState('col:edit-order:modal-nota', true);
 
+  // `/` jumps straight to the order search box (review #9).
+  useSlashToFocus();
+
   const fetchData = async () => {
     try {
       const [ordersData, data] = await Promise.all([
@@ -432,9 +435,10 @@ export default function EditOrderPage() {
 
   if (loading) {
     return (
-      <Center h="60vh">
-        <Loader size="lg" />
-      </Center>
+      <Stack gap="lg">
+        <Title order={2}>Senarai Pesanan</Title>
+        <TableSkeleton rows={6} columns={6} />
+      </Stack>
     );
   }
 
@@ -455,6 +459,7 @@ export default function EditOrderPage() {
       <Paper withBorder p="md">
         <TextInput
           leftSection={<IconSearch size={16} />}
+          data-search-input="true"
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
         />
@@ -471,7 +476,7 @@ export default function EditOrderPage() {
             { key: 'aksi', label: 'Aksi', visible: colAksi, onChange: setColAksi },
           ]} />
         </Box>
-        <Box style={{ overflowX: 'auto' }}>
+        <Box className="table-scroll">
           <Table striped highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
@@ -607,7 +612,7 @@ export default function EditOrderPage() {
                 { key: 'awu', label: 'AWU', visible: colItemAwu, onChange: setColItemAwu },
                 { key: 'nota', label: 'Nota', visible: colItemNota, onChange: setColItemNota },
               ]} />
-              <Box style={{ overflowX: 'auto' }}>
+              <Box className="table-scroll">
                 <Table striped highlightOnHover verticalSpacing="sm">
                   <Table.Thead>
                     <Table.Tr>

@@ -3,25 +3,31 @@ import { statusColor, statusLabel } from '@/lib/calculations';
 import type { StockStatus } from '@/lib/types';
 
 /**
- * Stock-status badge with a contrast-safe text colour.
+ * Stock-status badge with a contrast-safe text colour in *both* colour
+ * schemes (review items #1 and #10).
  *
- * Mantine's `variant="light"` renders the status colour as *text* on a 15%
- * tint of the same colour. Measured from this app's own build, that is
- * 1.61-2.86:1 — far below the 4.5:1 WCAG 1.4.3 requires for badge text.
+ * Mantine's `variant="light"` renders the status colour as text on a tint of
+ * the same colour: measured 1.75–3.01:1 in light mode. The first fix here used
+ * a fixed dark ink — excellent in light (18.7–19.7:1) but catastrophic in
+ * dark mode, where it collapses to 1.28–1.45:1 on dark tints.
  *
- * Keeping the tint (which carries the hue and still differentiates the five
- * statuses) while setting a dark ink measures 13.1-15.0:1 on white cards and
- * striped table rows alike — one style rule instead of five hand-checked
- * pairs.
+ * `--mantine-color-text` is scheme-aware (black in light, `#c9c9c9` in dark):
  *
- * Colour is never the only cue: the label text is always rendered (1.4.1).
+ * | scheme | badge text | result   |
+ * |--------|-----------:|----------|
+ * | light  | 18.7–19.7:1 | ✅      |
+ * | dark   |  6.9–7.8:1  | ✅      |
+ *
+ * both well past the 4.5:1 WCAG 1.4.3 requires. The tint stays because it
+ * carries the hue and still separates the five statuses, and the label is
+ * always rendered, so colour is never the only cue (1.4.1).
  */
 export default function StatusBadge({ status }: { status: StockStatus }) {
   return (
     <Badge
       color={statusColor(status)}
       variant="light"
-      styles={{ root: { color: 'var(--mantine-color-dark-8)' } }}
+      styles={{ root: { color: 'var(--mantine-color-text)' } }}
     >
       {statusLabel(status)}
     </Badge>

@@ -15,13 +15,12 @@ import {
   Select,
   Switch,
   Divider,
-  Loader,
-  Center,
   Alert,
 } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { api } from '@/lib/api';
 import { catalog } from '@/lib/catalog';
+import TableSkeleton, { SkeletonRows } from '@/components/Skeletons';
 import { usePersistedState } from '@/lib/usePersistedState';
 import { formatNum } from '@/lib/format';
 import { SKU, Group as GroupType } from '@/lib/types';
@@ -146,9 +145,12 @@ export default function OrderReportPage() {
 
   if (loadingData) {
     return (
-      <Center h="60vh">
-        <Loader size="lg" />
-      </Center>
+      <Container size="xl" py="xl">
+        <Title order={2} mb="lg">
+          Laporan Pesanan
+        </Title>
+        <TableSkeleton rows={5} columns={6} />
+      </Container>
     );
   }
 
@@ -251,7 +253,7 @@ export default function OrderReportPage() {
 
       <Paper withBorder p="md">
         {hasGenerated && (
-          <Box style={{ overflowX: 'auto' }}>
+          <Box className="table-scroll">
             <Table striped highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
@@ -265,19 +267,14 @@ export default function OrderReportPage() {
               </Table.Thead>
               <Table.Tbody>
                 {generating ? (
-                  <Table.Tr>
-                    <Table.Td
-                      colSpan={
-                        [colTarikh, colPembuat, colKod, colNama, colKumpulan, colKuantiti].filter(
-                          Boolean
-                        ).length || 1
-                      }
-                    >
-                      <Center py="xl">
-                        <Loader size="sm" />
-                      </Center>
-                    </Table.Td>
-                  </Table.Tr>
+                  <SkeletonRows
+                    rows={5}
+                    columns={
+                      [colTarikh, colPembuat, colKod, colNama, colKumpulan, colKuantiti].filter(
+                        Boolean
+                      ).length || 1
+                    }
+                  />
                 ) : reportRows.length === 0 ? (
                   <Table.Tr>
                     <Table.Td

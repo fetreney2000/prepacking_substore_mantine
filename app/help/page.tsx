@@ -317,7 +317,17 @@ export default function HelpPage() {
             </Group>
           </Title>
           <Text>
-            Aplikasi ini tidak menetapkan pintasan khas; pintasan pelayar berikut berguna:
+            Satu pintasan ditetapkan oleh aplikasi ini sendiri:
+          </Text>
+          <List>
+            <List.Item>
+              <Text fw={600}>/</Text> Fokus ke kotak carian halaman (senarai
+              item, cipta pesanan, senarai pesanan) supaya boleh terus menaip
+              carian tanpa menyentuh tetikus
+            </List.Item>
+          </List>
+          <Text>
+            Selain itu, pintasan pelayar berikut berguna:
           </Text>
           <List>
             <List.Item>

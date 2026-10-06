@@ -3,10 +3,11 @@
 import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { catalog } from '@/lib/catalog';
 import { usePersistedState } from '@/lib/usePersistedState';
-import { calculateLevels, determineStockStatus, statusLabel } from '@/lib/calculations';
+import { calculateLevels, determineStockStatus, statusLabel, STOCK_STATUS } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { escapeHtml, PRINT_TOGGLE_STYLE, buildPrintToggleBar } from '@/lib/print';
 import StatusBadge from '@/components/StatusBadge';
+import TableSkeleton from '@/components/Skeletons';
 import { SKU, Group, Settings, StockLevels, StockStatus } from '@/lib/types';
 import {
   Container,
@@ -20,8 +21,6 @@ import {
   Stack,
   Switch,
   Box,
-  Loader,
-  Center,
   Alert,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -161,14 +160,9 @@ export default function SKUReportPage() {
       rowsHtml += `<tr><td colspan="${colCount}" style="background:#e6eff8;font-weight:700;padding:8px 12px;border:1px solid #d9e1ec;">${escapeHtml(gName)}</td></tr>`;
 
       rows.forEach((row) => {
-        const statusBadgeBg =
-          row.status === 'ok'
-            ? '#dcfce7'
-            : row.status === 'low'
-            ? '#fef9c3'
-            : row.status === 'critical'
-            ? '#fee2e2'
-            : '#f3f4f6';
+        // From the shared status palette (review #8) — screen and paper
+        // cannot drift apart.
+        const statusBadgeBg = STOCK_STATUS[row.status]?.printBg ?? '#f3f4f6';
 
         rowsHtml += '<tr>';
         rowsHtml += `<td style="padding:6px 12px;border:1px solid #d9e1ec;">${escapeHtml(row.sku.kod)}</td>`;
@@ -275,9 +269,12 @@ ${rowsHtml}
 
   if (loading) {
     return (
-      <Center h="100vh">
-        <Loader size="lg" />
-      </Center>
+      <Container size="xl" py="xl">
+        <Title order={2} mb="xl">
+          Laporan Item
+        </Title>
+        <TableSkeleton rows={6} columns={6} />
+      </Container>
     );
   }
 
@@ -359,7 +356,7 @@ ${rowsHtml}
             Jumlah rekod: {filteredRows.length}
           </Text>
 
-          <Box style={{ overflowX: 'auto' }}>
+          <Box className="table-scroll">
             <Table striped highlightOnHover>
               <thead>
                 <tr>

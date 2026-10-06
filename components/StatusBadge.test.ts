@@ -28,12 +28,13 @@ describe('StatusBadge', () => {
     expect(render('disabled')).toContain('>Dinyahaktif<');
   });
 
-  it('overrides the light-variant text with the measured dark ink', () => {
-    // variant="light" declares --badge-color: ...-light-color (1.61-2.86:1,
-    // fails WCAG 1.4.3). Our override must be inline on the root, because the
-    // root's class rule sets color: var(--badge-color) and inline beats class.
+  it('overrides the light-variant text with a scheme-aware ink', () => {
+    // variant="light" declares --badge-color: ...-light-color: measured
+    // 1.75-3.01:1 light, and a fixed dark ink would collapse to 1.28-1.45:1
+    // in dark mode. --mantine-color-text passes in both schemes.
     for (const status of ALL) {
-      expect(render(status)).toMatch(/style="color:var\(--mantine-color-dark-8\)/);
+      expect(render(status)).toMatch(/style="color:var\(--mantine-color-text\)/);
+      expect(render(status)).not.toContain('mantine-color-dark-8');
     }
   });
 

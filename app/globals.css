@@ -23,7 +23,9 @@ a {
 .mantine-Table-table code {
   font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
   font-size: 12px;
-  background: var(--mantine-color-gray-1);
+  /* translucent, not a solid light chip: a solid gray-1 pill leaves light
+     text unreadable once the dark scheme flips the cell colour (item #10) */
+  background: var(--mantine-color-gray-light);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -39,7 +41,9 @@ a {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--mantine-color-gray-0);
+  /* transparent: a solid gray-0 track paints a white strip down the page in
+     dark mode (item #10) */
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -82,4 +86,53 @@ a {
    tabular figures are what make a number column scannable (item #3). */
 .mantine-Table-table td {
   font-variant-numeric: tabular-nums;
+}
+
+/* The skeleton shimmer is decoration, not information: staff who ask the OS
+   for reduced motion must not get an endlessly blinking placeholder (WCAG
+   2.2.2). Mantine's own reduced-motion switch only covers [data-reduce-motion]
+   elements, which Skeleton does not set, so this is handled here. */
+@media (prefers-reduced-motion: reduce) {
+  .mantine-Skeleton-root::after {
+    animation: none !important;
+  }
+}
+
+/* Sticky table headers (item #7).
+
+   A `<thead>` can only stick inside a scrollport, and the wrapper that gives
+   these tables horizontal scrolling is exactly that — but only if the wrapper
+   is capped in height. So `.table-scroll` caps the table at 70vh and lets it
+   scroll vertically on its own; tables shorter than that render exactly as
+   before (the cap never binds, so nothing changes visually).
+
+   Mantine's th background is transparent, so the sticky header needs an
+   opaque one — body matches the Paper/card it sits on in both colour schemes.
+   The th's own border is hidden and re-drawn as an inset shadow, because a
+   collapsed border does not travel with a sticky cell in all engines. */
+.table-scroll {
+  overflow: auto;
+  max-height: 70vh;
+}
+
+.table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--mantine-color-body);
+  border-bottom-color: transparent;
+  box-shadow: inset 0 -1px 0 var(--table-border-color);
+}
+
+/* Printing must never clip a long table at 70vh or pin its header (item #7). */
+@media print {
+  .table-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .table-scroll thead th {
+    position: static !important;
+    box-shadow: none !important;
+    border-bottom-color: inherit;
+  }
 }

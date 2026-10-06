@@ -39,26 +39,32 @@ export function determineStockStatus(sku: SKU, levels: StockLevels): StockStatus
   return 'ok';
 }
 
+/**
+ * Single source of truth for how a stock status looks (review item #8):
+ * the label shown everywhere, the Mantine colour behind the tinted badge, and
+ * the background used when the same status is printed on paper. StatusBadge
+ * and the report printer both read from here, so screen and paper cannot drift.
+ */
+export interface StockStatusMeta {
+  label: string;
+  color: string;
+  printBg: string;
+}
+
+export const STOCK_STATUS: Record<StockStatus, StockStatusMeta> = {
+  ok: { label: 'OK', color: 'green', printBg: '#dcfce7' },
+  low: { label: 'Rendah', color: 'yellow', printBg: '#fef9c3' },
+  critical: { label: 'Kritikal', color: 'red', printBg: '#fee2e2' },
+  out: { label: 'Kehabisan', color: 'gray', printBg: '#f3f4f6' },
+  disabled: { label: 'Dinyahaktif', color: 'gray', printBg: '#f3f4f6' },
+};
+
 export function statusLabel(status: StockStatus): string {
-  const map: Record<StockStatus, string> = {
-    ok: 'OK',
-    low: 'Rendah',
-    critical: 'Kritikal',
-    out: 'Kehabisan',
-    disabled: 'Dinyahaktif',
-  };
-  return map[status] || status;
+  return STOCK_STATUS[status]?.label ?? status;
 }
 
 export function statusColor(status: StockStatus): string {
-  const map: Record<StockStatus, string> = {
-    ok: 'green',
-    low: 'yellow',
-    critical: 'red',
-    out: 'gray',
-    disabled: 'gray',
-  };
-  return map[status] || 'gray';
+  return STOCK_STATUS[status]?.color ?? 'gray';
 }
 
 export function calculateOrderQty(sku: SKU, tempohMinggu: number): number {

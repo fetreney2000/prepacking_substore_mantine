@@ -55,27 +55,47 @@ Thresholds quoted from the W3C quick reference:
 | **3.1.1** | language of page declared | `<html lang="ms">` ✅ |
 | **3.3.4** | confirm before consequential actions | delete confirmations ✅, import confirmation ✅ |
 
-### Measured: status badge contrast — found failing, now fixed
+### Measured: status badge contrast — found failing, fixed in both schemes
 
-Computed from this app's build (`Badge variant="light"`; foreground = the full
-colour, background = the same colour at 15% alpha, over white **and** over a
-striped table row):
+Computed from this app's own build (`Badge variant="light"`). Mantine's tint
+is the status colour at **10% alpha in light mode, 15% in dark**; surfaces are
+white / a striped row `#f8f9fa` in light mode, `dark-7` (`#242424`) in dark:
 
-| Status | Before | After (`StatusBadge`) |
+**Light scheme** (before = Mantine's own full-colour text; after =
+`--mantine-color-text` = `#000`):
+
+| Status | Before | After |
 |---|---|---|
-| OK (green) | 2.08 / 1.99 | **14.53 / 13.87** |
-| Rendah (yellow) | 1.69 / 1.61 | **14.97 / 14.29** |
-| Kritikal (red) | 2.75 / 2.62 | **13.79 / 13.14** |
-| Kehabisan (gray) | 2.86 / 2.73 | **14.19 / 13.53** |
+| OK (green) | 2.17 / 2.07 | **19.31 / 18.39** |
+| Rendah (yellow) | 1.75 / 1.66 | **19.69 / 18.76** |
+| Kritikal (red) | 2.92 / 2.78 | **18.66 / 17.75** |
+| Kehabisan (gray) | 3.01 / 2.86 | **19.02 / 18.11** |
 
-Every "before" value fails 4.5:1; every "after" value passes on both surfaces.
-The fix lives in one place — `components/StatusBadge.tsx` keeps Mantine's tint
-(which carries the hue and still separates the five statuses) and sets an
-inline dark ink on the badge root, because an inline style beats the class rule
-that applies `--badge-color`. Covered by `components/StatusBadge.test.ts`.
+**Dark scheme** (badge text candidates on the 15% tint over `#242424`):
+
+| Status | fixed dark ink `#1f1f1f` | `--mantine-color-text` (`#c9c9c9`) |
+|---|---|---|
+| OK (green) | 1.38 ❌ | **7.20** ✅ |
+| Rendah (yellow) | 1.45 ❌ | **6.85** ✅ |
+| Kritikal (red) | 1.28 ❌ | **7.80** ✅ |
+| Kehabisan (gray) | 1.32 ❌ | **7.55** ✅ |
+
+Every "before" value fails 4.5:1. The fix is one inline rule in
+`components/StatusBadge.tsx`: keep Mantine's tint (it carries the hue and
+still separates the five statuses) and set the text to `--mantine-color-text`,
+the scheme-aware token (black in light, `#c9c9c9` in dark) — it clears 4.5:1
+in **both** schemes. Because the ink is a token rather than a literal, dark
+mode does not re-break the badge. Covered by `components/StatusBadge.test.ts`.
 
 Notes from the investigation, kept so nobody repeats them:
 
+- **The tint alpha differs by scheme** (10% light / 15% dark). The first
+  numbers published here used the dark alpha on light surfaces; the table above
+  is corrected to each scheme's real values — conclusions unchanged (all
+  "before" values fail), numbers replaced.
+- **A fixed dark ink passes light mode and fails dark mode** (1.28–1.45:1 —
+  near-black on a dark tint). Never hardcode an ink where a scheme-aware token
+  already exists.
 - **"Just use shade 9 text on shade 0"** only cures red (**5.10**) and gray
   (**14.63**); green **4.07** and yellow **2.83** still fail — hence an
   ink-on-tint rule rather than a shade swap.
@@ -83,7 +103,8 @@ Notes from the investigation, kept so nobody repeats them:
   rather than assume.
 - **Printed reports** had a separate palette with the same defect
   (2.74–3.95:1); `app/sku-report` now prints every status with one dark ink
-  (`PRINT_STATUS_INK = #111827`, measured 14.5–16.5:1).
+  (`PRINT_STATUS_INK = #111827`, measured 14.5–16.5:1). Paper is always the
+  light scheme, so dark mode never touches print output.
 - **Plain `c="…"` status words** (the old help page) resolve to the `-text`
   variants — `yellow-4` = **1.43:1**, `gray-4` = **1.49:1**, all four failing.
   The help page now renders the same `StatusBadge` as the app, so its labels
@@ -106,21 +127,22 @@ Notes from the investigation, kept so nobody repeats them:
 
 | # | Heuristic | What it means in this app | Status |
 |---|---|---|---|
-| 1 | Visibility of system status | loading states, `Button loading=`, inline error alerts with retry | ✅ error alerts added; ⚠️ still spinners where skeletons would be better |
+| 1 | Visibility of system status | loading states, `Button loading=`, inline error alerts with retry | ✅ error alerts added; skeleton loaders replace bare spinners on every loading page |
 | 2 | Match the real world | Malay pharmacy vocabulary, no internal jargon | ✅ (help page now matches the app) |
 | 3 | User control & freedom | every destructive action has an escape: cancel, confirm dialog, pre-import backup | ✅ |
 | 4 | Consistency & standards | one theme, consistent labels, platform conventions | ⚠️ see §9 terminology |
 | 5 | Error prevention | confirm before delete/import; block invalid settings before saving | ✅ |
 | 6 | Recognition over recall | filters, search, visible column toggles rather than hidden state | ✅ |
-| 7 | Flexibility & efficiency | accelerators for repeated use (search-as-you-type, remembered inputs) | ⚠️ no keyboard shortcuts yet |
+| 7 | Flexibility & efficiency | accelerators for repeated use (search-as-you-type, remembered inputs) | ✅ `/` focuses search (implemented, then documented on the help page) |
 | 8 | Aesthetic & minimalist design | remove anything not serving the data; `ColumnToggle` instead of more chrome | ✅ |
 | 9 | Recognise/diagnose/recover from errors | plain language, no error codes, say what to do; request-id correlates to server logs | ✅ |
 | 10 | Help in context | the Help page exists and is now accurate | ✅ |
 
-Note on #7: keyboard shortcuts were *removed* from the help page because they
-were never implemented. If they are wanted, implement first, then document
-(standard candidates: `/` to focus search, `Ctrl+K` spotlight via
-`@mantine/spotlight`).
+Note on #7: the app now has exactly one accelerator — `/` focuses the page's
+search field (`lib/useSlashToFocus.ts`, opt-in via `data-search-input` on the
+input) — and the help page documents exactly that one, nothing more. Any new
+shortcut follows the same order: implement, test, *then* document (candidates
+if ever needed: `Ctrl+K` spotlight via `@mantine/spotlight`).
 
 ---
 
@@ -147,10 +169,14 @@ values… use the semantic token instead"*, with named functional roles —
 do not copy): text `#0b0c0c`, secondary `#484949`, border `#cecece`,
 focus `#ffdd00`, error `#ca3535`, success `#0f7a52`.
 
-Apply the same idea to our five stock statuses: define one status palette in
-the theme (role → colour pair, each pair measured to ≥4.5:1) and make
-`statusColor()` return those roles, instead of loose strings scattered through
-pages.
+Done (item 8): the five stock statuses have exactly one definition —
+`STOCK_STATUS` in `lib/calculations.ts`, a table of `{ label, color, printBg }`
+per status. `statusColor()`/`statusLabel()` read from it, `StatusBadge` is the
+only place that renders a status, and the printed reports take their
+background from the same row, so screen and paper cannot drift apart. It lives
+in `lib/` rather than `theme.other` on purpose: the print popups are plain
+HTML strings in a separate document and never see the theme object — a module
+both contexts can import is the single source of truth that actually holds.
 
 ### Recommended `createTheme` additions
 
@@ -169,6 +195,16 @@ const theme = createTheme({
   },
 });
 ```
+
+Dark mode (item 10) is implemented: `MantineProvider defaultColorScheme="auto"`
+in `app/providers.tsx` plus `<ColorSchemeScript defaultColorScheme="auto" />`
+in `app/layout.tsx`, so the scheme follows the OS and is applied before first
+paint (no white flash on a dark-mode machine). Every pair this document
+measures was re-checked per scheme — the badge numbers are in §3, and the two
+light-only rules found in `globals.css` (solid `gray-1` code chips, `gray-0`
+scrollbar track) now use translucent/body tokens. A manual toggle would be
+`forceColorScheme` + `usePersistedState` if staff ever ask for one; print
+popups stay light-on-paper by design.
 
 Do **not** hardcode hex in components (including the print popups, which should
 keep using their own checked palette for paper output).
@@ -214,8 +250,13 @@ keep using their own checked palette for paper output).
 - **Toasts vs alerts:** transient success/failure → toast; a persistent state
   the user must act on (load failure, validation summary) → inline Alert with a
   retry. Never report a failure as an empty result.
-- **Tables:** striped + hover + border (already the theme default), sticky
-  header above ~20 rows, empty state with a next action, loading skeleton.
+- **Tables:** striped + hover + border (already the theme default), empty state
+  with a next action, skeleton loading rows (`components/Skeletons.tsx`:
+  `TableSkeleton` for pages that return early while loading, `SkeletonRows`
+  inside an existing `<Table.Tbody>`). Sticky headers: every data table sits in
+  a `.table-scroll` box, which caps it at 70vh so `thead th` can stick — the
+  cap never binds on short tables, so nothing there changes, and print CSS
+  drops the cap and unpins the header.
 - **Modals:** Mantine traps focus ✅ — keep dialogs ≤`size="lg"` for forms,
   `centered`, and never put a whole page in a modal.
 
@@ -226,6 +267,10 @@ keep using their own checked palette for paper output).
 - Column visibility persists per user (already implemented via
   `usePersistedState`) — new tables must register the same way, keyed
   `col:<page>:<name>`.
+- Every table lives inside `<Box className="table-scroll">`, never a bare
+  `style={{ overflowX: 'auto' }}`: the class is what gives the sticky header
+  (§7) its scrollport and the print rules something to target. New tables must
+  use it.
 - Search filters *rendering*, never data: rows outside the filter keep their
   values and are still saved (already the contract on Cipta Pesanan — keep it).
 - Print output is raw HTML written into a popup: **every string interpolated
@@ -254,7 +299,9 @@ keep using their own checked palette for paper output).
 
 - [ ] `npm run lint` · `npx tsc --noEmit` · `npm test` · `npm run build` all green
 - [ ] Contrast: status badges, links, dimmed text, focus ring ≥4.5:1 / 3:1
-- [ ] Keyboard-only pass on every page (login → dashboard → form → save)
+      — in **both** colour schemes (toggle the OS setting; §3 has the numbers)
+- [ ] Keyboard-only pass on every page (login → dashboard → form → save),
+      including `/` focusing search on the three pages that have it
 - [ ] Icon-button targets ≥24×24
 - [ ] Loading / empty / error states all reachable and distinguishable
 - [ ] Destructive actions confirm; import takes a pre-import backup
@@ -271,21 +318,28 @@ keep using their own checked palette for paper output).
 
 | # | Item | Evidence |
 |---|---|---|
-| ✅ 1 | Status badge contrast: 1.61–2.86:1 → **13.1–15.0:1** | `components/StatusBadge.tsx` (single rule, used by dashboard, skus, sku-report and help) + `StatusBadge.test.ts`; print ink fixed in `app/sku-report` — all measured in §3 |
+| ✅ 1 | Status badge contrast: 1.75–3.01:1 (Mantine default) → **18.7–19.7:1 light / 6.9–7.8:1 dark** | `components/StatusBadge.tsx` (single rule, used by dashboard, skus, sku-report and help) + `StatusBadge.test.ts`; print ink fixed in `app/sku-report` — both schemes measured in §3 (earlier light-only numbers were corrected there when the tint alpha was re-derived) |
 | ✅ 2 | Heading skips (h2 → h4) | now `order={2}` ×12, `order={3}` ×22, `order={4}` ×0 — no page skips a level; verified in rendered HTML |
 | ✅ 3 | `font-variant-numeric: tabular-nums` on `.mantine-Table-table td` | present in the built CSS |
 | ✅ 4 | `autoContrast: true` + `respectReducedMotion: true` in `createTheme` | both present in the client bundle |
 | ✅ 5 | Icon-button target-size audit | §7 — ActionIcon 28px, inputs 30px, Switch 32×16 via the spacing exception |
 
-**Remaining:**
+**Done — items 6–10:**
 
-| # | Item | Evidence | Effort |
-|---|---|---|---|
-| 6 | Skeleton loaders instead of bare spinners on the 4 list pages | §4.1 | ~2 h |
-| 7 | Sticky table headers for long tables | §7 | ~2 h |
-| 8 | Semantic status palette in `theme.other` — partly done: `statusColor()`/`statusLabel()` now have a single caller (`StatusBadge`) | §5 | ~1 h |
-| 9 | Keyboard accelerator (e.g. `/` focus search) — implement *then* document | §4.7 | ~half day |
-| 10 | Dark mode (only if staff work nights) — re-measure **every** pair in §3 first | optional | ~1 day |
+| # | Item | Evidence |
+|---|---|---|
+| ✅ 6 | Skeleton loaders instead of bare spinners | `components/Skeletons.tsx` (`TableSkeleton` + `SkeletonRows`, 5 tests) used by dashboard, skus, groups, create-order, edit-order, order-report, sku-report — no page returns a bare `Loader` any more; the shimmer honours `prefers-reduced-motion` (`globals.css`) |
+| ✅ 7 | Sticky table headers | `.table-scroll` on all 8 table wrappers: 70vh cap + sticky opaque `thead th` (border redrawn as an inset shadow, since a collapsed border does not travel with a sticky cell), all dropped for print — §7, §8 |
+| ✅ 8 | Semantic status palette | `STOCK_STATUS` in `lib/calculations.ts`: one row per status (`label`, `color`, `printBg`) feeding `statusColor()`/`statusLabel()`, `StatusBadge` and the print background (+3 tests) — §5 |
+| ✅ 9 | Keyboard accelerator, implemented *then* documented | `lib/useSlashToFocus.ts` (`/` → focus search, ignores fields already focused, `preventDefault` vs Firefox quick-find) on skus / create-order / edit-order via `data-search-input`; the help page documents exactly this one shortcut |
+| ✅ 10 | Dark mode with per-scheme re-measurement | `ColorSchemeScript` + `defaultColorScheme="auto"` (follows the OS, no flash); badge ink re-measured per scheme and switched to `--mantine-color-text` (§3: 18.7–19.7:1 light, 6.9–7.8:1 dark); two light-only CSS rules fixed (code chip, scrollbar track) |
+
+**Remaining:** none open. The one optional extra from item 10 — a manual
+scheme toggle instead of OS-following — is written up in §5 if staff ask for
+it. Note that `useSlashToFocus` has no unit test: vitest runs without a DOM,
+so its keydown behaviour needs either a DOM environment or a manual check
+before release (§3 "how to verify" step 2 covers it — press `/` on the Item
+page).
 
 ---
 

@@ -24,6 +24,7 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
 import ColumnToggle from '@/components/ColumnToggle';
+import { SkeletonRows } from '@/components/Skeletons';
 
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -221,7 +222,7 @@ export default function GroupsPage() {
         ]} />
       </Box>
 
-      <Box style={{ overflowX: 'auto' }}>
+      <Box className="table-scroll">
         <Table striped highlightOnHover>
           <thead>
             <tr>
@@ -234,13 +235,7 @@ export default function GroupsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={visibleCount}>
-                  <Text ta="center" py="xl">
-                    Memuatkan...
-                  </Text>
-                </td>
-              </tr>
+              <SkeletonRows rows={5} columns={visibleCount} />
             ) : rows.length === 0 ? (
               <tr>
                 <td colSpan={visibleCount}>

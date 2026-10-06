@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { catalog, invalidateCatalog } from '@/lib/catalog';
 import { usePersistedState } from '@/lib/usePersistedState';
+import { useSlashToFocus } from '@/lib/useSlashToFocus';
 import { calculateLevels, determineStockStatus } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { SKU, Group, Settings } from '@/lib/types';
@@ -31,6 +32,7 @@ import { showNotification } from '@mantine/notifications';
 import { IconPlus, IconTrash, IconSearch, IconEdit } from '@tabler/icons-react';
 import ColumnToggle from '@/components/ColumnToggle';
 import StatusBadge from '@/components/StatusBadge';
+import { SkeletonRows } from '@/components/Skeletons';
 
 const emptyForm = {
   kod: '',
@@ -76,6 +78,9 @@ export default function SKUsPage() {
   const [colMaks, setColMaks] = usePersistedState('col:skus:maks', true);
   const [colStatus, setColStatus] = usePersistedState('col:skus:status', false);
   const [colAksi, setColAksi] = usePersistedState('col:skus:aksi', true);
+
+  // `/` jumps straight to the search box (review #9).
+  useSlashToFocus();
 
   const fetchData = async () => {
     try {
@@ -280,6 +285,7 @@ export default function SKUsPage() {
         <MantineGroup gap="md" align="flex-end">
           <TextInput
             leftSection={<IconSearch size={16} />}
+            data-search-input="true"
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
             style={{ flex: 1 }}
@@ -314,7 +320,7 @@ export default function SKUsPage() {
         ]} />
       </Box>
 
-      <Box style={{ overflowX: 'auto' }}>
+      <Box className="table-scroll">
         <Table striped highlightOnHover style={{ minWidth: '1024px' }}>
           <thead>
             <tr>
@@ -332,13 +338,7 @@ export default function SKUsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={visibleCount}>
-                  <Text ta="center" py="xl">
-                    Memuatkan...
-                  </Text>
-                </td>
-              </tr>
+              <SkeletonRows rows={6} columns={visibleCount} />
             ) : rows.length === 0 ? (
               <tr>
                 <td colSpan={visibleCount}>

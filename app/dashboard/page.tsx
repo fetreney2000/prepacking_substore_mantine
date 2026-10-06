@@ -9,8 +9,7 @@ import {
   Title,
   Table,
   Paper,
-  Loader,
-  Center,
+  Skeleton,
   Box,
   Alert,
   Button,
@@ -32,6 +31,7 @@ import { formatNum } from '@/lib/format';
 import { SKU, Group as GroupType, Settings } from '@/lib/types';
 import ColumnToggle from '@/components/ColumnToggle';
 import StatusBadge from '@/components/StatusBadge';
+import TableSkeleton from '@/components/Skeletons';
 
 export default function DashboardPage() {
   const [skus, setSkus] = useState<SKU[]>([]);
@@ -69,11 +69,22 @@ export default function DashboardPage() {
     fetchData();
   }, [fetchData]);
 
+  // While loading, show the shape of the page rather than a bare spinner, so
+  // the layout does not jump when the data lands (review #6).
   if (loading) {
     return (
-      <Center h="100vh">
-        <Loader size="lg" />
-      </Center>
+      <Stack gap="lg">
+        <Title order={2}>Papan Pemuka</Title>
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>
+          {[0, 1, 2, 3].map((i) => (
+            <Paper key={i} withBorder p="md">
+              <Skeleton height={14} w={90} />
+              <Skeleton height={28} w={120} mt="sm" />
+            </Paper>
+          ))}
+        </SimpleGrid>
+        <TableSkeleton rows={5} columns={6} />
+      </Stack>
     );
   }
 
@@ -193,7 +204,7 @@ export default function DashboardPage() {
                 { key: 'status', label: 'Status', visible: colStatus, onChange: setColStatus },
               ]} />
             </Box>
-            <Box style={{ overflowX: 'auto' }}>
+            <Box className="table-scroll">
               <Table striped highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
