@@ -182,7 +182,7 @@ export default function SyncPage() {
 
       <Paper withBorder p="md" radius="md">
         <Stack gap="md">
-          <Title order={4}>Eksport Pangkalan Data</Title>
+          <Title order={3}>Eksport Pangkalan Data</Title>
           <Text size="sm" c="dimmed">
             Muat turun semua data sebagai fail JSON untuk sandaran.
           </Text>
@@ -201,7 +201,7 @@ export default function SyncPage() {
 
       <Paper withBorder p="md" radius="md">
         <Stack gap="md">
-          <Title order={4}>Import Pangkalan Data</Title>
+          <Title order={3}>Import Pangkalan Data</Title>
           <Text size="sm" c="dimmed">
             Import data daripada fail JSON. Peringatan: ini akan menimpa data sedia
             ada — fail sandaran data semasa akan dimuat turun dahulu secara automatik.
@@ -229,7 +229,7 @@ export default function SyncPage() {
 
       <Paper withBorder p="md" radius="md">
         <Stack gap="md">
-          <Title order={4}>Import Excel</Title>
+          <Title order={3}>Import Excel</Title>
           <Text size="sm" c="dimmed">
             Import data daripada fail Excel (.xls, .xlsx). Data akan dikemas kini mengikut jadual yang sepadan.
           </Text>

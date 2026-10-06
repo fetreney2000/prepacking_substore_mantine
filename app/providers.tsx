@@ -7,6 +7,11 @@ import AppLayout from '@/components/AppLayout';
 const theme = createTheme({
   primaryColor: 'blue',
   defaultRadius: 'md',
+  // Keep label text legible on filled variants by picking light/dark by
+  // luminance instead of assuming white (WCAG 1.4.3, item #4).
+  autoContrast: true,
+  // Honour the OS "reduce motion" setting rather than animating regardless.
+  respectReducedMotion: true,
   components: {
     Button: {
       defaultProps: {

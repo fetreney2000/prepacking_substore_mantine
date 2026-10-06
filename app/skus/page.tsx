@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { catalog, invalidateCatalog } from '@/lib/catalog';
 import { usePersistedState } from '@/lib/usePersistedState';
-import { calculateLevels, determineStockStatus, statusLabel, statusColor } from '@/lib/calculations';
+import { calculateLevels, determineStockStatus } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { SKU, Group, Settings } from '@/lib/types';
 import {
@@ -20,7 +20,6 @@ import {
   Checkbox,
   Select,
   Group as MantineGroup,
-  Badge,
   Text,
   Stack,
   SimpleGrid,
@@ -31,6 +30,7 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { IconPlus, IconTrash, IconSearch, IconEdit } from '@tabler/icons-react';
 import ColumnToggle from '@/components/ColumnToggle';
+import StatusBadge from '@/components/StatusBadge';
 
 const emptyForm = {
   kod: '',
@@ -221,9 +221,7 @@ export default function SKUsPage() {
           {colMaks && <td>{formatNum(levels.maks)}</td>}
           {colStatus && (
             <td>
-              <Badge color={statusColor(status)} variant="light">
-                {statusLabel(status)}
-              </Badge>
+              <StatusBadge status={status} />
             </td>
           )}
           {colAksi && (

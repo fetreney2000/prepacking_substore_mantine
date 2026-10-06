@@ -7,7 +7,6 @@ import {
   Group,
   Text,
   Title,
-  Badge,
   Table,
   Paper,
   Loader,
@@ -28,12 +27,11 @@ import { usePersistedState } from '@/lib/usePersistedState';
 import {
   calculateLevels,
   determineStockStatus,
-  statusLabel,
-  statusColor,
 } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { SKU, Group as GroupType, Settings } from '@/lib/types';
 import ColumnToggle from '@/components/ColumnToggle';
+import StatusBadge from '@/components/StatusBadge';
 
 export default function DashboardPage() {
   const [skus, setSkus] = useState<SKU[]>([]);
@@ -176,7 +174,7 @@ export default function DashboardPage() {
       </SimpleGrid>
 
       <Paper withBorder p="md">
-        <Title order={4} mb="md">
+        <Title order={3} mb="md">
           Stok Rendah / Kehabisan Stok
         </Title>
         {lowStockSkus.length === 0 ? (
@@ -217,9 +215,7 @@ export default function DashboardPage() {
                       {colMin && <Table.Td>{formatNum(sku.levels.min)}</Table.Td>}
                       {colStatus && (
                         <Table.Td>
-                          <Badge color={statusColor(sku.status)}>
-                            {statusLabel(sku.status)}
-                          </Badge>
+                          <StatusBadge status={sku.status} />
                         </Table.Td>
                       )}
                     </Table.Tr>

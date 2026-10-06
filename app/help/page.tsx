@@ -24,6 +24,7 @@ import {
   IconDeviceMobile,
   IconKeyboard,
 } from '@tabler/icons-react';
+import StatusBadge from '@/components/StatusBadge';
 
 export default function HelpPage() {
   return (
@@ -35,7 +36,7 @@ export default function HelpPage() {
 
       <Paper withBorder p="md" radius="md">
         <Stack gap="md">
-          <Title order={4}>Pengenalan</Title>
+          <Title order={3}>Pengenalan</Title>
           <Text>
             Sistem Inventori Prabungkus adalah aplikasi pengurusan inventori untuk Substor Hospital Keningau. 
             Sistem ini membantu pengurus farmasi menjejaki stok ubat prabungkus, mengira tahap inventori optimum, 
@@ -44,7 +45,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconDashboard size={20} />
               <span>Papan Pemuka (Dashboard)</span>
@@ -62,7 +63,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconPackage size={20} />
               <span>Pengurusan SKU</span>
@@ -85,7 +86,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconUsers size={20} />
               <span>Kumpulan</span>
@@ -99,7 +100,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconClipboardList size={20} />
               <span>Cipta Pesanan</span>
@@ -123,7 +124,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconEdit size={20} />
               <span>Edit Pesanan</span>
@@ -137,7 +138,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconReport size={20} />
               <span>Laporan Pesanan</span>
@@ -151,7 +152,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconReport size={20} />
               <span>Laporan Item</span>
@@ -165,7 +166,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconCalculator size={20} />
               <span>Pengiraan Inventori</span>
@@ -190,32 +191,47 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>Status Stok</Title>
+          <Title order={3}>Status Stok</Title>
           <Text>
             Status stok ditentukan oleh perbandingan antara stok semasa dengan paras minimum
             dan penimbal:
           </Text>
           <List>
             <List.Item>
-              <Text fw={600} c="green">OK:</Text> Stok pada atau melebihi paras penimbal
+              <Group gap="xs" align="center">
+                <StatusBadge status="ok" />
+                <Text component="span">Stok pada atau melebihi paras penimbal</Text>
+              </Group>
             </List.Item>
             <List.Item>
-              <Text fw={600} c="yellow">Rendah:</Text> Stok di antara paras minimum dan penimbal
+              <Group gap="xs" align="center">
+                <StatusBadge status="low" />
+                <Text component="span">Stok di antara paras minimum dan penimbal</Text>
+              </Group>
             </List.Item>
             <List.Item>
-              <Text fw={600} c="red">Kritikal:</Text> Stok pada atau di bawah paras minimum
+              <Group gap="xs" align="center">
+                <StatusBadge status="critical" />
+                <Text component="span">Stok pada atau di bawah paras minimum</Text>
+              </Group>
             </List.Item>
             <List.Item>
-              <Text fw={600} c="gray">Kehabisan:</Text> Stok sifar
+              <Group gap="xs" align="center">
+                <StatusBadge status="out" />
+                <Text component="span">Stok sifar</Text>
+              </Group>
             </List.Item>
             <List.Item>
-              <Text fw={600} c="gray">Dinyahaktif:</Text> Item tidak dikira dan tidak dipesan
+              <Group gap="xs" align="center">
+                <StatusBadge status="disabled" />
+                <Text component="span">Item tidak dikira dan tidak dipesan</Text>
+              </Group>
             </List.Item>
           </List>
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconSettings size={20} />
               <span>Tetapan</span>
@@ -236,7 +252,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconRefresh size={20} />
               <span>Penyelarasan Data</span>
@@ -262,7 +278,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconTable size={20} />
               <span>Pilihan Kolum Jadual</span>
@@ -276,7 +292,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconDeviceMobile size={20} />
               <span>Ciri Mudah Alih</span>
@@ -294,7 +310,7 @@ export default function HelpPage() {
 
           <Divider />
 
-          <Title order={4}>
+          <Title order={3}>
             <Group gap="xs">
               <IconKeyboard size={20} />
               <span>Pintasan Papan Kekunci</span>

@@ -55,31 +55,39 @@ Thresholds quoted from the W3C quick reference:
 | **3.1.1** | language of page declared | `<html lang="ms">` ✅ |
 | **3.3.4** | confirm before consequential actions | delete confirmations ✅, import confirmation ✅ |
 
-### Measured: status badges currently fail contrast
+### Measured: status badge contrast — found failing, now fixed
 
-Computed from this app's build (`Badge variant="light"`, white card background;
-foreground = full colour, background = same colour at 15% alpha over white):
+Computed from this app's build (`Badge variant="light"`; foreground = the full
+colour, background = the same colour at 15% alpha, over white **and** over a
+striped table row):
 
-| Status | Badge | Ratio | Result |
-|---|---|---|---|
-| OK | `green` | **2.08:1** | ❌ fails 4.5:1 |
-| Rendah | `yellow` | **1.69:1** | ❌ fails — the worst |
-| Kritikal | `red` | **2.75:1** | ❌ fails |
-| Kehabisan / Dinyahaktif | `gray` | **2.86:1** | ❌ fails |
+| Status | Before | After (`StatusBadge`) |
+|---|---|---|
+| OK (green) | 2.08 / 1.99 | **14.53 / 13.87** |
+| Rendah (yellow) | 1.69 / 1.61 | **14.97 / 14.29** |
+| Kritikal (red) | 2.75 / 2.62 | **13.79 / 13.14** |
+| Kehabisan (gray) | 2.86 / 2.73 | **14.19 / 13.53** |
 
-Trying "just use shade 9 text" on a shade-0 background is not enough either:
-red **5.10** ✅ and gray **14.63** ✅ pass, but green **4.07** and yellow
-**2.83** still fail.
+Every "before" value fails 4.5:1; every "after" value passes on both surfaces.
+The fix lives in one place — `components/StatusBadge.tsx` keeps Mantine's tint
+(which carries the hue and still separates the five statuses) and sets an
+inline dark ink on the badge root, because an inline style beats the class rule
+that applies `--badge-color`. Covered by `components/StatusBadge.test.ts`.
 
-**Direction:** keep the tint as background, put a genuinely dark ink on top
-(`dark.8`/`dark.9`, or the GOV.UK model of `text` on a tinted surface) and
-re-measure. `autoContrast: true` in the theme fixes filled variants
-automatically, but `variant="filled"` with white text fails for several
-colours on its own — measure, do not assume.
+Notes from the investigation, kept so nobody repeats them:
 
-Plain `c="…"` status words (help page) resolve to the `-text` variants
-(`--mantine-color-yellow-text → yellow-4`); these also need an in-browser
-check — they were not resolvable from the static CSS with certainty.
+- **"Just use shade 9 text on shade 0"** only cures red (**5.10**) and gray
+  (**14.63**); green **4.07** and yellow **2.83** still fail — hence an
+  ink-on-tint rule rather than a shade swap.
+- **`variant="filled"` + `autoContrast`** is not a free pass either: measure
+  rather than assume.
+- **Printed reports** had a separate palette with the same defect
+  (2.74–3.95:1); `app/sku-report` now prints every status with one dark ink
+  (`PRINT_STATUS_INK = #111827`, measured 14.5–16.5:1).
+- **Plain `c="…"` status words** (the old help page) resolve to the `-text`
+  variants — `yellow-4` = **1.43:1**, `gray-4` = **1.49:1**, all four failing.
+  The help page now renders the same `StatusBadge` as the app, so its labels
+  match both the UI and the contrast rule.
 
 ### How to verify (do this before every release)
 
@@ -193,6 +201,14 @@ keep using their own checked palette for paper output).
   network action; destructive buttons `color="red"` + confirmation.
 - **Icon buttons:** must satisfy 24×24 target size — a 16px icon needs ≥24px
   (prefer 32px) of hit area. Always give `aria-label` (icons alone fail 4.1.2).
+
+  *Target-size audit (item 5, done):* ActionIcon resolves to
+  `--ai-size: var(--ai-size-md)` = 1.75rem = **28px** ✅; text inputs at
+  `size="xs"` are 1.875rem = **30px** ✅; the ColumnToggle `Switch size="xs"`
+  is **32×16px** — under 24px tall, but it passes through the 2.5.8 spacing
+  exception (16px gaps keep the notional 24px circle clear of its neighbours)
+  and its label is clickable, which enlarges the effective target. **Never pass
+  `size="xs"`/`sm` to an ActionIcon: those are 18px and 22px — both fail.**
 - **Inputs:** visible label for every field; `description` for help text;
   errors next to the field, not only in a toast (3.3.1/3.3.2).
 - **Toasts vs alerts:** transient success/failure → toast; a persistent state
@@ -251,18 +267,25 @@ keep using their own checked palette for paper output).
 
 ## 11. Measured backlog (priority order)
 
+**Done — items 1–5:**
+
+| # | Item | Evidence |
+|---|---|---|
+| ✅ 1 | Status badge contrast: 1.61–2.86:1 → **13.1–15.0:1** | `components/StatusBadge.tsx` (single rule, used by dashboard, skus, sku-report and help) + `StatusBadge.test.ts`; print ink fixed in `app/sku-report` — all measured in §3 |
+| ✅ 2 | Heading skips (h2 → h4) | now `order={2}` ×12, `order={3}` ×22, `order={4}` ×0 — no page skips a level; verified in rendered HTML |
+| ✅ 3 | `font-variant-numeric: tabular-nums` on `.mantine-Table-table td` | present in the built CSS |
+| ✅ 4 | `autoContrast: true` + `respectReducedMotion: true` in `createTheme` | both present in the client bundle |
+| ✅ 5 | Icon-button target-size audit | §7 — ActionIcon 28px, inputs 30px, Switch 32×16 via the spacing exception |
+
+**Remaining:**
+
 | # | Item | Evidence | Effort |
 |---|---|---|---|
-| 1 | Fix status badge contrast (1.69–2.86:1 → ≥4.5:1) | measured in this doc | small (theme) |
-| 2 | Fix h2 → h4 heading skips on create-order, dashboard, help, sync | verified by grep | minutes |
-| 3 | `tabular-nums` on quantity/stock columns | §6 | minutes |
-| 4 | `autoContrast: true` + `respectReducedMotion: true` | §5 (verified present in 7.17.8) | minutes |
-| 5 | Audit icon-button target sizes (24×24) | §3 | small |
 | 6 | Skeleton loaders instead of bare spinners on the 4 list pages | §4.1 | ~2 h |
 | 7 | Sticky table headers for long tables | §7 | ~2 h |
-| 8 | Semantic status palette in `theme.other`; `statusColor()` returns roles | §5 | ~1 h |
+| 8 | Semantic status palette in `theme.other` — partly done: `statusColor()`/`statusLabel()` now have a single caller (`StatusBadge`) | §5 | ~1 h |
 | 9 | Keyboard accelerator (e.g. `/` focus search) — implement *then* document | §4.7 | ~half day |
-| 10 | Dark mode (only if staff work nights) | optional | ~1 day |
+| 10 | Dark mode (only if staff work nights) — re-measure **every** pair in §3 first | optional | ~1 day |
 
 ---
 

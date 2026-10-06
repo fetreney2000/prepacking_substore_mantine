@@ -331,7 +331,7 @@ export default function CreateOrderPage() {
       </Paper>
 
       <Paper withBorder p="md">
-        <Title order={4} mb="md">
+        <Title order={3} mb="md">
           Item Pesanan
         </Title>
 

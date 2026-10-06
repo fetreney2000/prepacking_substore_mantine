@@ -77,3 +77,9 @@ a {
 .mantine-AppShell-main table {
   min-width: 600px;
 }
+
+/* Digit columns in a stock table must not change width as values change —
+   tabular figures are what make a number column scannable (item #3). */
+.mantine-Table-table td {
+  font-variant-numeric: tabular-nums;
+}

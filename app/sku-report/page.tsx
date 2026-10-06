@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { catalog } from '@/lib/catalog';
 import { usePersistedState } from '@/lib/usePersistedState';
-import { calculateLevels, determineStockStatus, statusLabel, statusColor } from '@/lib/calculations';
+import { calculateLevels, determineStockStatus, statusLabel } from '@/lib/calculations';
 import { formatNum } from '@/lib/format';
 import { escapeHtml, PRINT_TOGGLE_STYLE, buildPrintToggleBar } from '@/lib/print';
+import StatusBadge from '@/components/StatusBadge';
 import { SKU, Group, Settings, StockLevels, StockStatus } from '@/lib/types';
 import {
   Container,
@@ -14,7 +15,6 @@ import {
   Table,
   Select,
   Group as MantineGroup,
-  Badge,
   Text,
   Paper,
   Stack,
@@ -43,6 +43,14 @@ interface ReportRow {
   groupName: string;
   groupId: number | null;
 }
+
+/**
+ * Ink for the status pills in the printed report. The previous per-status
+ * colours measured 2.74-3.95:1 on their pastel backgrounds (WCAG 1.4.3 needs
+ * 4.5:1); one dark ink measures 14.5-16.5:1 and the hue still comes from the
+ * background — same treatment as the on-screen StatusBadge.
+ */
+const PRINT_STATUS_INK = '#111827';
 
 export default function SKUReportPage() {
   const [skus, setSkus] = useState<SKU[]>([]);
@@ -153,14 +161,6 @@ export default function SKUReportPage() {
       rowsHtml += `<tr><td colspan="${colCount}" style="background:#e6eff8;font-weight:700;padding:8px 12px;border:1px solid #d9e1ec;">${escapeHtml(gName)}</td></tr>`;
 
       rows.forEach((row) => {
-        const statusBadgeColor =
-          row.status === 'ok'
-            ? '#16a34a'
-            : row.status === 'low'
-            ? '#ca8a04'
-            : row.status === 'critical'
-            ? '#dc2626'
-            : '#6b7280';
         const statusBadgeBg =
           row.status === 'ok'
             ? '#dcfce7'
@@ -180,7 +180,7 @@ export default function SKUReportPage() {
         rowsHtml += `<td class="sr-penimbal" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.penimbal)}</td>`;
         rowsHtml += `<td class="sr-maks" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${formatNum(row.levels.maks)}</td>`;
         rowsHtml += `<td class="sr-minggu" style="padding:6px 12px;border:1px solid #d9e1ec;text-align:right;">${row.mingguStok !== null ? row.mingguStok.toFixed(2) : '-'}</td>`;
-        rowsHtml += `<td class="sr-status" style="padding:6px 12px;border:1px solid #d9e1ec;"><span style="background:${statusBadgeBg};color:${statusBadgeColor};padding:2px 8px;border-radius:4px;font-size:12px;">${escapeHtml(statusLabel(row.status))}</span></td>`;
+        rowsHtml += `<td class="sr-status" style="padding:6px 12px;border:1px solid #d9e1ec;"><span style="background:${statusBadgeBg};color:${PRINT_STATUS_INK};padding:2px 8px;border-radius:4px;font-size:12px;">${escapeHtml(statusLabel(row.status))}</span></td>`;
         rowsHtml += '</tr>';
       });
     });
@@ -268,9 +268,7 @@ ${rowsHtml}
         {row.mingguStok !== null ? row.mingguStok.toFixed(2) : '-'}
       </td>
       <td>
-        <Badge color={statusColor(row.status)} variant="light">
-          {statusLabel(row.status)}
-        </Badge>
+        <StatusBadge status={row.status} />
       </td>
     </>
   );
