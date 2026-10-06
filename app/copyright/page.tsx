@@ -7,7 +7,7 @@ export default function CopyrightPage() {
   return (
     <Stack gap="lg" p="md" align="center">
       <Group>
-        <IconCopyright size={28} />
+        <IconCopyright size={28} color="var(--mantine-color-cyan-8)" />
         <Title order={2}>Hak Cipta</Title>
       </Group>
 
@@ -33,11 +33,11 @@ export default function CopyrightPage() {
 
           <Stack gap="xs" align="center">
             <Group gap="xs">
-              <IconPhone size={16} />
+              <IconPhone size={16} color="var(--mantine-color-teal-7)" />
               <Text>016-881 3920</Text>
             </Group>
             <Group gap="xs">
-              <IconMail size={16} />
+              <IconMail size={16} color="var(--mantine-color-pink-6)" />
               <Text>fetreney2000@gmail.com</Text>
             </Group>
           </Stack>

@@ -176,7 +176,7 @@ export default function SyncPage() {
   return (
     <Stack gap="lg" p="md">
       <Group>
-        <IconRefresh size={28} />
+        <IconRefresh size={28} color="var(--mantine-color-lime-7)" />
         <Title order={2}>Selaraskan Data</Title>
       </Group>
 

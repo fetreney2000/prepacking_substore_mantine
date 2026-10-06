@@ -344,7 +344,7 @@ export default function CreateOrderPage() {
             label="Tapis item"
             placeholder="Kod atau nama"
             data-search-input="true"
-            leftSection={<IconSearch size={16} />}
+            leftSection={<IconSearch size={16} color="var(--mantine-color-blue-6)" />}
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
             style={{ flex: 1, minWidth: 240 }}

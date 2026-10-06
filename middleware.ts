@@ -35,6 +35,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Framework assets are public; everything else passes through this gate.
-  matcher: ['/((?!_next/|favicon.ico).*)'],
+  // Framework assets and the brand icon are public (a browser fetches the
+  // favicon before any login); everything else passes through this gate.
+  matcher: ['/((?!_next/|favicon\\.ico|icon\\.svg).*)'],
 };

@@ -31,7 +31,7 @@ export default function HelpPage() {
   return (
     <Stack gap="lg" p="md">
       <Group>
-        <IconHelp size={28} />
+        <IconHelp size={28} color="var(--mantine-color-indigo-6)" />
         <Title order={2}>Bantuan</Title>
       </Group>
 
@@ -48,7 +48,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconDashboard size={20} />
+              <IconDashboard size={20} color="var(--mantine-color-blue-6)" />
               <span>Papan Pemuka (Dashboard)</span>
             </Group>
           </Title>
@@ -66,7 +66,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconPackage size={20} />
+              <IconPackage size={20} color="var(--mantine-color-teal-7)" />
               <span>Pengurusan SKU</span>
             </Group>
           </Title>
@@ -89,7 +89,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconUsers size={20} />
+              <IconUsers size={20} color="var(--mantine-color-violet-6)" />
               <span>Kumpulan</span>
             </Group>
           </Title>
@@ -103,7 +103,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconClipboardList size={20} />
+              <IconClipboardList size={20} color="var(--mantine-color-green-7)" />
               <span>Cipta Pesanan</span>
             </Group>
           </Title>
@@ -127,7 +127,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconEdit size={20} />
+              <IconEdit size={20} color="var(--mantine-color-orange-6)" />
               <span>Edit Pesanan</span>
             </Group>
           </Title>
@@ -141,7 +141,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconReport size={20} />
+              <IconReport size={20} color="var(--mantine-color-pink-6)" />
               <span>Laporan Pesanan</span>
             </Group>
           </Title>
@@ -155,7 +155,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconReport size={20} />
+              <IconReport size={20} color="var(--mantine-color-grape-6)" />
               <span>Laporan Item</span>
             </Group>
           </Title>
@@ -169,7 +169,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconCalculator size={20} />
+              <IconCalculator size={20} color="var(--mantine-color-cyan-8)" />
               <span>Pengiraan Inventori</span>
             </Group>
           </Title>
@@ -234,7 +234,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconSettings size={20} />
+              <IconSettings size={20} color="var(--mantine-color-gray-7)" />
               <span>Tetapan</span>
             </Group>
           </Title>
@@ -255,7 +255,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconRefresh size={20} />
+              <IconRefresh size={20} color="var(--mantine-color-lime-7)" />
               <span>Penyelarasan Data</span>
             </Group>
           </Title>
@@ -281,7 +281,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconTable size={20} />
+              <IconTable size={20} color="var(--mantine-color-blue-7)" />
               <span>Pilihan Kolum Jadual</span>
             </Group>
           </Title>
@@ -295,7 +295,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconDeviceMobile size={20} />
+              <IconDeviceMobile size={20} color="var(--mantine-color-teal-7)" />
               <span>Ciri Mudah Alih</span>
             </Group>
           </Title>
@@ -313,7 +313,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconSunMoon size={20} />
+              <IconSunMoon size={20} color="var(--mantine-color-yellow-6)" />
               <span>Mod Cerah dan Gelap</span>
             </Group>
           </Title>
@@ -336,7 +336,7 @@ export default function HelpPage() {
 
           <Title order={3}>
             <Group gap="xs">
-              <IconKeyboard size={20} />
+              <IconKeyboard size={20} color="var(--mantine-color-grape-6)" />
               <span>Pintasan Papan Kekunci</span>
             </Group>
           </Title>

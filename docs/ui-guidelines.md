@@ -253,6 +253,17 @@ keep using their own checked palette for paper output).
   exception (16px gaps keep the notional 24px circle clear of its neighbours)
   and its label is clickable, which enlarges the effective target. **Never pass
   `size="xs"`/`sm` to an ActionIcon: those are 18px and 22px — both fail.**
+- **Icons:** every icon is coloured — never default grey. Each feature owns an
+  identity hue, used consistently by its nav item, help-section icon and page
+  title (dashboard blue, items teal, groups violet, create green, orders
+  orange, order reports pink, item reports grape, settings gray, sync lime,
+  help indigo, copyright cyan); actions keep semantic colours (edit blue,
+  print grape, delete red); the header trio is pastel on the brand gradient
+  (logout red-3, sun yellow-4, moon violet-2). The brand mark is
+  `components/BrandIcon.tsx`, mirrored by `app/icon.svg` for the browser tab —
+  a package box and hospital cross on the header gradient; change both
+  together (BrandIcon.test.ts fails if they drift). Text stays neutral:
+  colour decorates, labels carry meaning (1.4.1).
 - **Inputs:** visible label for every field; `description` for help text;
   errors next to the field, not only in a toast (3.3.1/3.3.2).
 - **Toasts vs alerts:** transient success/failure → toast; a persistent state

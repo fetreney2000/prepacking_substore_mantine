@@ -6,6 +6,7 @@ import {
   Alert,
   Button,
   Center,
+  Group,
   Stack,
   Paper,
   PasswordInput,
@@ -14,6 +15,7 @@ import {
 } from '@mantine/core';
 import { IconAlertCircle, IconLogin } from '@tabler/icons-react';
 import { api } from '@/lib/api';
+import BrandIcon from '@/components/BrandIcon';
 
 /** Only same-origin paths are accepted as a post-login redirect target. */
 function safeRedirectTarget(): string {
@@ -50,7 +52,10 @@ export default function LoginPage() {
       <Paper withBorder p="xl" radius="md" w={380} shadow="sm">
         <Stack gap="md">
           <div>
-            <Title order={3}>Sistem Inventori Prabungkus</Title>
+            <Group gap="sm" mb={4}>
+              <BrandIcon size={36} />
+              <Title order={3}>Sistem Inventori Prabungkus</Title>
+            </Group>
             <Text size="sm" c="dimmed">
               Substor Hospital Keningau — sila log masuk untuk meneruskan.
             </Text>

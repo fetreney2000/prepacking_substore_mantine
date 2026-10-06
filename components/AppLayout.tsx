@@ -13,19 +13,22 @@ import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { catalog } from '@/lib/catalog';
 import ColorSchemeToggle from './ColorSchemeToggle';
+import BrandIcon from './BrandIcon';
 
+// Each feature owns one identity hue, used by its nav icon, its help-section
+// icon and its page title — colour decorates, the label carries the meaning.
 const navItems = [
-  { label: 'Papan Pemuka', href: '/dashboard', icon: IconDashboard },
-  { label: 'Pengurusan Item', href: '/skus', icon: IconPackage },
-  { label: 'Pengurusan Kumpulan', href: '/groups', icon: IconUsers },
-  { label: 'Cipta Pesanan', href: '/create-order', icon: IconPlus },
-  { label: 'Senarai Pesanan', href: '/edit-order', icon: IconClipboardList },
-  { label: 'Laporan Pesanan', href: '/order-report', icon: IconReport },
-  { label: 'Laporan Item', href: '/sku-report', icon: IconChartBar },
-  { label: 'Tetapan', href: '/settings', icon: IconSettings },
-  { label: 'Penyelarasan Data', href: '/sync', icon: IconRefresh },
-  { label: 'Bantuan', href: '/help', icon: IconHelp },
-  { label: 'Hak Cipta', href: '/copyright', icon: IconCopyright },
+  { label: 'Papan Pemuka', href: '/dashboard', icon: IconDashboard, color: 'var(--mantine-color-blue-6)' },
+  { label: 'Pengurusan Item', href: '/skus', icon: IconPackage, color: 'var(--mantine-color-teal-7)' },
+  { label: 'Pengurusan Kumpulan', href: '/groups', icon: IconUsers, color: 'var(--mantine-color-violet-6)' },
+  { label: 'Cipta Pesanan', href: '/create-order', icon: IconPlus, color: 'var(--mantine-color-green-7)' },
+  { label: 'Senarai Pesanan', href: '/edit-order', icon: IconClipboardList, color: 'var(--mantine-color-orange-6)' },
+  { label: 'Laporan Pesanan', href: '/order-report', icon: IconReport, color: 'var(--mantine-color-pink-6)' },
+  { label: 'Laporan Item', href: '/sku-report', icon: IconChartBar, color: 'var(--mantine-color-grape-6)' },
+  { label: 'Tetapan', href: '/settings', icon: IconSettings, color: 'var(--mantine-color-gray-7)' },
+  { label: 'Penyelarasan Data', href: '/sync', icon: IconRefresh, color: 'var(--mantine-color-lime-7)' },
+  { label: 'Bantuan', href: '/help', icon: IconHelp, color: 'var(--mantine-color-indigo-6)' },
+  { label: 'Hak Cipta', href: '/copyright', icon: IconCopyright, color: 'var(--mantine-color-cyan-8)' },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -77,7 +80,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     >
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
-          <Group>
+          <Group gap="xs">
+            <BrandIcon size={24} />
             <Text size="lg" fw={600} c="white" truncate maw={600}>
               {appTitle}
             </Text>
@@ -91,7 +95,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 variant="subtle"
                 onClick={handleLogout}
                 aria-label="Keluar"
-                style={{ color: 'white' }}
+                color="var(--mantine-color-red-3)"
               >
                 <IconLogout size={18} />
               </ActionIcon>
@@ -114,7 +118,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   component={Link}
                   href={item.href}
-                  leftSection={<Icon size={20} />}
+                  leftSection={<Icon size={20} color={item.color} />}
                   label={item.label}
                   active={active}
                   variant="subtle"

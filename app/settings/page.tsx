@@ -114,7 +114,7 @@ export default function SettingsPage() {
   return (
     <Stack gap="lg" p="md">
       <Group>
-        <IconSettings size={28} />
+        <IconSettings size={28} color="var(--mantine-color-gray-7)" />
         <Title order={2}>Tetapan</Title>
       </Group>
 

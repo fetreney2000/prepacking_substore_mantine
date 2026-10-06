@@ -458,7 +458,7 @@ export default function EditOrderPage() {
 
       <Paper withBorder p="md">
         <TextInput
-          leftSection={<IconSearch size={16} />}
+          leftSection={<IconSearch size={16} color="var(--mantine-color-blue-6)" />}
           data-search-input="true"
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
@@ -511,7 +511,7 @@ export default function EditOrderPage() {
                           <Tooltip label="Cetak" position="top" withArrow>
                             <ActionIcon
                               variant="subtle"
-                              color="blue"
+                              color="grape"
                               onClick={() => handlePrint(order)}
                             >
                               <IconPrinter size={16} />
@@ -520,7 +520,7 @@ export default function EditOrderPage() {
                           <Tooltip label="Edit" position="top" withArrow>
                             <ActionIcon
                               variant="subtle"
-                              color="yellow"
+                              color="blue"
                               onClick={() => handleOpenEdit(order)}
                             >
                               <IconEdit size={16} />

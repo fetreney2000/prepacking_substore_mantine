@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Sistem Inventori Prabungkus">
+  <!--
+    Brand mark for the prepacking inventory app: a package box (what the
+    system tracks) with a hospital cross (who it is for) on the app's own
+    header gradient. Keep these paths in sync with components/BrandIcon.tsx,
+    which renders the same artwork inline for the header and sign-in page.
+  -->
+  <defs>
+    <linearGradient id="brandG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1E3A8A"/>
+      <stop offset="1" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7.5" fill="url(#brandG)"/>
+  <!-- lid -->
+  <rect x="4.5" y="8.5" width="23" height="4.8" rx="1.6" fill="#12B886"/>
+  <!-- box body -->
+  <rect x="6" y="13.3" width="20" height="12.2" rx="1.8" fill="#FFFFFF"/>
+  <!-- hospital cross -->
+  <path d="M14.1 14.6h3.8v2.9h2.9v3.8h-2.9v2.9h-3.8v-2.9h-2.9v-3.8h2.9z" fill="#1E3A8A"/>
+</svg>

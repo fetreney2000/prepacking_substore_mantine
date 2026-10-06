@@ -314,6 +314,7 @@ ${rowsHtml}
           <Button
             leftSection={<IconPrinter size={16} />}
             variant="light"
+            color="grape"
             onClick={handlePrint}
             disabled={!reportGenerated || filteredRows.length === 0}
           >

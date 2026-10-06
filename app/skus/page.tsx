@@ -284,7 +284,7 @@ export default function SKUsPage() {
       <Paper p="md" mb="xl" withBorder>
         <MantineGroup gap="md" align="flex-end">
           <TextInput
-            leftSection={<IconSearch size={16} />}
+            leftSection={<IconSearch size={16} color="var(--mantine-color-blue-6)" />}
             data-search-input="true"
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}

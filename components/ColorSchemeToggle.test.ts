@@ -26,7 +26,10 @@ describe('ColorSchemeToggle', () => {
     expect(html).not.toContain('sun');
   });
 
-  it('keeps the header ink white on the blue gradient', () => {
-    expect(render()).toContain('color:white');
+  it('uses a pastel that holds contrast on the blue header gradient', () => {
+    const html = render();
+    // Server state is light -> offers the dark scheme with the violet moon.
+    expect(html).toContain('var(--mantine-color-violet-2)');
+    expect(html).not.toContain('color:white');
   });
 });

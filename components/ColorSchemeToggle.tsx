@@ -32,7 +32,13 @@ export default function ColorSchemeToggle() {
         variant="subtle"
         aria-label={label}
         onClick={() => toggleColorScheme()}
-        style={{ color: 'white' }}
+        // Pastels read clearly on the header's blue gradient in both schemes:
+        // yellow for "make it light", violet for "make it dark".
+        color={
+          switchingToLight
+            ? 'var(--mantine-color-yellow-4)'
+            : 'var(--mantine-color-violet-2)'
+        }
       >
         {switchingToLight ? <IconSun size={18} /> : <IconMoon size={18} />}
       </ActionIcon>
