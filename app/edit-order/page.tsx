@@ -435,7 +435,7 @@ export default function EditOrderPage() {
 
   if (loading) {
     return (
-      <Stack gap="lg">
+      <Stack gap="lg" py="xl">
         <Title order={2}>Senarai Pesanan</Title>
         <TableSkeleton rows={6} columns={6} />
       </Stack>
@@ -453,7 +453,7 @@ export default function EditOrderPage() {
   };
 
   return (
-    <Stack gap="lg">
+    <Stack gap="lg" py="xl">
       <Title order={2}>Senarai Pesanan</Title>
 
       <Paper withBorder p="md">

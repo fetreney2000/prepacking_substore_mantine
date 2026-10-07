@@ -296,7 +296,7 @@ export default function CreateOrderPage() {
 
   if (loading) {
     return (
-      <Stack gap="lg">
+      <Stack gap="lg" py="xl">
         <Title order={2}>Cipta Pesanan Baru</Title>
         <TableSkeleton rows={8} columns={5} />
       </Stack>
@@ -304,7 +304,7 @@ export default function CreateOrderPage() {
   }
 
   return (
-    <Stack gap="lg">
+    <Stack gap="lg" py="xl">
       <Title order={2}>Cipta Pesanan Baru</Title>
 
       <Paper withBorder p="md">
@@ -358,7 +358,10 @@ export default function CreateOrderPage() {
           ]} />
         </Group>
 
-        <Box className="table-scroll">
+        {/* Opt out of the frozen first column: this table's first cell is a
+            single "kod — nama" string that can run to ~260px, and pinning
+            that on a 360px phone would leave almost nothing to pan with. */}
+        <Box className="table-scroll table-scroll--no-freeze">
           <Table striped highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>

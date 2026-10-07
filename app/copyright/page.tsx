@@ -5,7 +5,7 @@ import { IconCopyright, IconUser, IconPhone, IconMail } from '@tabler/icons-reac
 
 export default function CopyrightPage() {
   return (
-    <Stack gap="lg" p="md" align="center">
+    <Stack gap="lg" py="xl" align="center">
       <Group>
         <IconCopyright size={28} color="var(--mantine-color-cyan-8)" />
         <Title order={2}>Hak Cipta</Title>

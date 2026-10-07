@@ -29,7 +29,7 @@ import StatusBadge from '@/components/StatusBadge';
 
 export default function HelpPage() {
   return (
-    <Stack gap="lg" p="md">
+    <Stack gap="lg" py="xl">
       <Group>
         <IconHelp size={28} color="var(--mantine-color-indigo-6)" />
         <Title order={2}>Bantuan</Title>
@@ -361,6 +361,11 @@ export default function HelpPage() {
               <Text fw={600}>Ctrl + P:</Text> Cetak halaman melalui pelayar
             </List.Item>
           </List>
+          <Text size="sm" c="dimmed">
+            Pintasan di atas memerlukan papan kekunci. Pada telefon atau
+            tablet, ketik medan carian terus untuk menaip, dan gunakan butang
+            menu di pengepala untuk membuka navigasi.
+          </Text>
         </Stack>
       </Paper>
     </Stack>

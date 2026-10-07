@@ -73,7 +73,7 @@ export default function DashboardPage() {
   // the layout does not jump when the data lands (review #6).
   if (loading) {
     return (
-      <Stack gap="lg">
+      <Stack gap="lg" py="xl">
         <Title order={2}>Papan Pemuka</Title>
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>
           {[0, 1, 2, 3].map((i) => (
@@ -91,7 +91,7 @@ export default function DashboardPage() {
   // Fail loudly: zeros and "no low stock items" would be wrong, not empty.
   if (loadError) {
     return (
-      <Stack gap="lg">
+      <Stack gap="lg" py="xl">
         <Title order={2}>Papan Pemuka</Title>
         <Alert
           color="red"
@@ -153,7 +153,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <Stack gap="lg">
+    <Stack gap="lg" py="xl">
       <Title order={2}>Papan Pemuka</Title>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>

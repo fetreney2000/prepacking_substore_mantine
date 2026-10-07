@@ -290,12 +290,15 @@ export default function SKUsPage() {
             onChange={(e) => setSearch(e.currentTarget.value)}
             style={{ flex: 1 }}
           />
+          {/* `w` rather than `minWidth`: on a phone the select gets its own
+              line and fills it, instead of stopping 76px short of the edge;
+              from `sm` up it is pinned to 180px beside the search box. */}
           <Select
             data={groupOptions}
             value={filterGroup}
             onChange={setFilterGroup}
             clearable
-            style={{ minWidth: 180 }}
+            w={{ base: '100%', sm: 180 }}
           />
           <Checkbox
             label="Aktif sahaja"
@@ -321,7 +324,13 @@ export default function SKUsPage() {
       </Box>
 
       <Box className="table-scroll">
-        <Table striped highlightOnHover style={{ minWidth: '1024px' }}>
+        {/* 1024px stops the ten columns wrapping into unreadable stacks, but
+            below `sm` it is ~2.8 screens of panning on a phone — and because
+            the floor was unconditional, hiding columns via the toggles could
+            never shorten the scroll. Floor of 600px on phones (the global
+            table minimum) so the column toggles bite; from `sm` up nothing
+            changes. */}
+        <Table striped highlightOnHover miw={{ base: 600, sm: 1024 }}>
           <thead>
             <tr>
               {colKod && <th>Kod</th>}
@@ -361,7 +370,10 @@ export default function SKUsPage() {
         size="lg"
       >
         <Stack gap="md">
-          <SimpleGrid cols={2}>
+          {/* `base: 1`: a phone-width modal gives each cell ~150px, which is
+              unusable for a labelled field — stack below `sm`, keep the
+              side-by-side layout from tablets up. */}
+          <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <TextInput
               label="Kod"
               value={form.kod}
@@ -376,7 +388,7 @@ export default function SKUsPage() {
             />
           </SimpleGrid>
 
-          <SimpleGrid cols={2}>
+          <SimpleGrid cols={{ base: 1, sm: 2 }}>
             <NumberInput
               label="Saiz Pek"
               value={form.saizPek}
@@ -408,7 +420,7 @@ export default function SKUsPage() {
           <Text size="sm" fw={500}>
             Penggunaan Bulanan
           </Text>
-          <SimpleGrid cols={3}>
+          <SimpleGrid cols={{ base: 1, sm: 3 }}>
             <NumberInput
               label="Bulan 1"
               value={form.usageMonth1}
@@ -432,6 +444,8 @@ export default function SKUsPage() {
           {(form.usageMonth1 > 0 || form.usageMonth2 > 0 || form.usageMonth3 > 0) && settings && !form.useManualLevels && (
             <Paper p="sm" withBorder bg="blue.0">
               <Text size="sm" fw={500} mb="xs">Pratonton Tahap Stok</Text>
+              {/* Deliberately left at `cols={3}`: read-only label + number
+                  stacks that survive ~96px cells, unlike the input grids. */}
               <SimpleGrid cols={3}>
                 <Box>
                   <Text size="xs" c="dimmed">Min</Text>
@@ -519,7 +533,7 @@ export default function SKUsPage() {
           </MantineGroup>
 
           {form.useManualLevels && (
-            <SimpleGrid cols={3}>
+            <SimpleGrid cols={{ base: 1, sm: 3 }}>
               <NumberInput
                 label="Min Manual"
                 value={form.minManual}
