@@ -8,6 +8,7 @@ import { formatNum } from '@/lib/format';
 import { escapeHtml, PRINT_TOGGLE_STYLE, buildPrintToggleBar } from '@/lib/print';
 import StatusBadge from '@/components/StatusBadge';
 import TableSkeleton from '@/components/Skeletons';
+import ColumnToggle from '@/components/ColumnToggle';
 import { SKU, Group, Settings, StockLevels, StockStatus } from '@/lib/types';
 import {
   Container,
@@ -19,7 +20,6 @@ import {
   Text,
   Paper,
   Stack,
-  Switch,
   Box,
   Alert,
 } from '@mantine/core';
@@ -302,11 +302,12 @@ ${rowsHtml}
 
       <Paper p="md" mb="xl" withBorder>
         <MantineGroup gap="md" align="flex-end">
+          {/* Full-width on a phone, 200px from `sm` up (see skus toolbar). */}
           <Select
             data={STATUS_OPTIONS}
             value={statusFilter}
             onChange={setStatusFilter}
-            style={{ minWidth: 200 }}
+            w={{ base: '100%', sm: 200 }}
           />
           <Button leftSection={<IconReport size={16} />} onClick={handleGenerate}>
             Jana Laporan
@@ -327,28 +328,15 @@ ${rowsHtml}
         <Text size="sm" fw={500} mb="xs">
           Paparan Kolum
         </Text>
-        <MantineGroup gap="xl">
-          <Switch
-            label="Kumpulan"
-            checked={showKumpulan}
-            onChange={(e) => setShowKumpulan(e.currentTarget.checked)}
-          />
-          <Switch
-            label="Min"
-            checked={showMin}
-            onChange={(e) => setShowMin(e.currentTarget.checked)}
-          />
-          <Switch
-            label="Penimbal"
-            checked={showPenimbal}
-            onChange={(e) => setShowPenimbal(e.currentTarget.checked)}
-          />
-          <Switch
-            label="Maks"
-            checked={showMaks}
-            onChange={(e) => setShowMaks(e.currentTarget.checked)}
-          />
-        </MantineGroup>
+        <ColumnToggle
+          label="Paparan Kolum"
+          columns={[
+            { key: 'kumpulan', label: 'Kumpulan', visible: showKumpulan, onChange: setShowKumpulan },
+            { key: 'min', label: 'Min', visible: showMin, onChange: setShowMin },
+            { key: 'penimbal', label: 'Penimbal', visible: showPenimbal, onChange: setShowPenimbal },
+            { key: 'maks', label: 'Maks', visible: showMaks, onChange: setShowMaks },
+          ]}
+        />
       </Paper>
 
       {reportGenerated && (

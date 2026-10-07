@@ -13,7 +13,6 @@ import {
   Box,
   Text,
   Select,
-  Switch,
   Divider,
   Alert,
 } from '@mantine/core';
@@ -21,6 +20,7 @@ import { IconAlertCircle } from '@tabler/icons-react';
 import { api } from '@/lib/api';
 import { catalog } from '@/lib/catalog';
 import TableSkeleton, { SkeletonRows } from '@/components/Skeletons';
+import ColumnToggle from '@/components/ColumnToggle';
 import { usePersistedState } from '@/lib/usePersistedState';
 import { formatNum } from '@/lib/format';
 import { SKU, Group as GroupType } from '@/lib/types';
@@ -217,38 +217,17 @@ export default function OrderReportPage() {
         <Text size="sm" fw={600} mb="sm">
           Paparkan Tunjang
         </Text>
-        <Group gap="md">
-          <Switch
-            label="Tarikh"
-            checked={colTarikh}
-            onChange={(e) => setColTarikh(e.currentTarget.checked)}
-          />
-          <Switch
-            label="Pembuat"
-            checked={colPembuat}
-            onChange={(e) => setColPembuat(e.currentTarget.checked)}
-          />
-          <Switch
-            label="Kod"
-            checked={colKod}
-            onChange={(e) => setColKod(e.currentTarget.checked)}
-          />
-          <Switch
-            label="Nama"
-            checked={colNama}
-            onChange={(e) => setColNama(e.currentTarget.checked)}
-          />
-          <Switch
-            label="Kumpulan"
-            checked={colKumpulan}
-            onChange={(e) => setColKumpulan(e.currentTarget.checked)}
-          />
-          <Switch
-            label="Kuantiti"
-            checked={colKuantiti}
-            onChange={(e) => setColKuantiti(e.currentTarget.checked)}
-          />
-        </Group>
+        <ColumnToggle
+          label="Paparkan Tunjang"
+          columns={[
+            { key: 'tarikh', label: 'Tarikh', visible: colTarikh, onChange: setColTarikh },
+            { key: 'pembuat', label: 'Pembuat', visible: colPembuat, onChange: setColPembuat },
+            { key: 'kod', label: 'Kod', visible: colKod, onChange: setColKod },
+            { key: 'nama', label: 'Nama', visible: colNama, onChange: setColNama },
+            { key: 'kumpulan', label: 'Kumpulan', visible: colKumpulan, onChange: setColKumpulan },
+            { key: 'kuantiti', label: 'Kuantiti', visible: colKuantiti, onChange: setColKuantiti },
+          ]}
+        />
       </Paper>
 
       <Paper withBorder p="md">
