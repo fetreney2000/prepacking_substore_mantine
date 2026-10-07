@@ -1,6 +1,7 @@
 'use client';
 
-import { AppShell, Group, Text, Box, NavLink, ScrollArea, Stack, ActionIcon, Tooltip } from '@mantine/core';
+import { AppShell, Group, Text, Box, Container, NavLink, ScrollArea, Stack, ActionIcon, Tooltip, Burger } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import {
   IconDashboard, IconPackage, IconUsers, IconPlus,
   IconClipboardList, IconReport, IconChartBar,
@@ -36,6 +37,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [clock, setClock] = useState('');
   const [appTitle, setAppTitle] = useState('Sistem Inventori Farmasi');
+  // Below the navbar breakpoint Mantine hides the sidebar entirely (and while
+  // open it covers the whole content area), so the header needs a toggle for
+  // phones and tablets.
+  const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
+
+  // Tapping a nav link navigates, but does not close the overlay by itself —
+  // drop it here so the page the user just picked is what they see.
+  useEffect(() => {
+    closeNav();
+  }, [pathname, closeNav]);
 
   useEffect(() => {
     const update = () => {
@@ -74,20 +85,44 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AppShell
       header={{ height: 56 }}
-      navbar={{ width: 260, breakpoint: 'md' }}
+      navbar={{
+        // 220px keeps more content in view on 1024x768 screens, 260px from
+        // the `lg` breakpoint up (this replaces the old `width: 220px !important`
+        // override, which fought Mantine's own responsive navbar variables).
+        width: { base: 220, lg: 260 },
+        breakpoint: 'md',
+        // `mobile: !navOpened` is what actually collapses the sidebar below the
+        // breakpoint; without it Mantine renders the navbar as a full-width
+        // overlay painted on top of the page (review item: mobile nav).
+        collapsed: { mobile: !navOpened, desktop: false },
+      }}
       footer={{ height: 32 }}
       padding={0}
     >
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
           <Group gap="xs">
+            {/* Only exists below the navbar breakpoint, where it is the only
+                way to reach the nav; stays visible so the open overlay can be
+                dismissed (the navbar starts below the header, z-index 101 vs
+                100, so it never covers this button). */}
+            <Burger
+              opened={navOpened}
+              onClick={toggleNav}
+              hiddenFrom="md"
+              size="sm"
+              color="white"
+              aria-label={navOpened ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
+            />
             <BrandIcon size={24} />
             <Text size="lg" fw={600} c="white" truncate maw={600}>
               {appTitle}
             </Text>
           </Group>
           <Group gap="xs">
-            <Text size="xs" c="rgba(255,255,255,0.8)">
+            {/* The same clock sits in the footer; on a phone it squeezed the
+                title down to ~50px, so it is desktop-only now. */}
+            <Text size="xs" c="rgba(255,255,255,0.8)" hiddenFrom="sm">
               {clock}
             </Text>
             <Tooltip label="Keluar" position="bottom" withArrow>
@@ -135,14 +170,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <AppShell.Main>
         <Box p="md">
-          {children}
+          {/* One 1320px (Container `xl`) frame for every page, so pages that
+              render their own `Container size="xl"` nest an identical cap and
+              pages that do not (dashboard, settings, help, …) stop stretching
+              forms and cards across a 2560px monitor. */}
+          <Container size="xl">
+            {children}
+          </Container>
         </Box>
       </AppShell.Main>
 
       <AppShell.Footer p="xs" px="md">
         <Group justify="space-between" h="100%">
-          <Text size="xs" c="dimmed">{clock}</Text>
-          <Text size="xs" c="dimmed">{appTitle} v2.0</Text>
+          <Text size="xs" c="dimmed" hiddenFrom="xs">
+            {clock}
+          </Text>
+          {/* `truncate` (not just `w`): the footer is a fixed 32px bar, so an
+              unbroken title used to wrap to three lines and spill over the
+              page behind it on a 320-375px screen. */}
+          <Text size="xs" c="dimmed" truncate>
+            {appTitle} v2.0
+          </Text>
         </Group>
       </AppShell.Footer>
     </AppShell>

@@ -48,8 +48,12 @@ export default function LoginPage() {
   };
 
   return (
-    <Center mih="100vh" bg="var(--mantine-color-body)">
-      <Paper withBorder p="xl" radius="md" w={380} shadow="sm">
+    // `dvh`, not `vh`: on mobile Safari the URL bar re-sizes the viewport and
+    // `vh` leaves the card hanging off-screen. Horizontal padding + a max
+    // width (instead of a fixed `w={380}`) keeps the card inside a 320px
+    // screen instead of forcing a sideways scroll.
+    <Center mih="100dvh" px="md" bg="var(--mantine-color-body)">
+      <Paper withBorder p="xl" radius="md" w="100%" maw={380} shadow="sm">
         <Stack gap="md">
           <div>
             <Group gap="sm" mb={4}>
