@@ -45,7 +45,7 @@ const theme = createTheme({
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <MantineProvider theme={theme} defaultColorScheme="auto">
-      <Notifications position="bottom-right" />
+      <Notifications position="bottom-right" className="app-notifications" />
       <AppLayout>
         {children}
       </AppLayout>
