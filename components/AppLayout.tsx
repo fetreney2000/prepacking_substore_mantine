@@ -101,7 +101,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     >
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
-          <Group gap="xs">
+          {/* Both this Group and the title need a zero base and a zero floor
+              (`flex: 1 1 0%` + `minWidth: 0`). `truncate` sets
+              white-space: nowrap, so the title's min-content is its FULL
+              text width — ~389px for "Sistem Inventori Prabungkus Hospital
+              Keningau". Flex line-breaking uses those base sizes, so the
+              header wrapped to three rows inside its fixed 56px bar and
+              dropped the buttons out of it (measured: scrollH=111 vs
+              boxH=56, buttons at y=83..111). With a zero base the line
+              always fits and the title ellipsizes instead. */}
+          <Group gap="xs" style={{ flex: '1 1 0%', minWidth: 0 }}>
             {/* Only exists below the navbar breakpoint, where it is the only
                 way to reach the nav; stays visible so the open overlay can be
                 dismissed (the navbar starts below the header, z-index 101 vs
@@ -115,7 +124,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               aria-label={navOpened ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
             />
             <BrandIcon size={24} />
-            <Text size="lg" fw={600} c="white" truncate maw={600}>
+            <Text
+              size="lg"
+              fw={600}
+              c="white"
+              truncate
+              maw={600}
+              style={{ flex: '1 1 0%', minWidth: 0 }}
+            >
               {appTitle}
             </Text>
           </Group>
