@@ -120,9 +120,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Text>
           </Group>
           <Group gap="xs">
-            {/* The same clock sits in the footer; on a phone it squeezed the
-                title down to ~50px, so it is desktop-only now. */}
-            <Text size="xs" c="rgba(255,255,255,0.8)" hiddenFrom="sm">
+            {/* `visibleFrom`, not `hiddenFrom`: Mantine's `hiddenFrom="sm"`
+                means "hidden from sm *up*", i.e. it showed the clock on
+                phones — and the extra ~110px pushed the header past the
+                viewport, shoving the logout and theme buttons off-screen
+                with no way to scroll to them (the header is fixed). The
+                same clock sits in the footer below, so nothing is lost. */}
+            <Text size="xs" c="rgba(255,255,255,0.8)" visibleFrom="sm">
               {clock}
             </Text>
             <Tooltip label="Keluar" position="bottom" withArrow>
@@ -182,7 +186,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       <AppShell.Footer p="xs" px="md">
         <Group justify="space-between" h="100%">
-          <Text size="xs" c="dimmed" hiddenFrom="xs">
+          {/* Same `visibleFrom` inversion as the header clock: it must be
+              absent below `xs`, where it would compete with the title for
+              the 32px bar. */}
+          <Text size="xs" c="dimmed" visibleFrom="xs">
             {clock}
           </Text>
           {/* `truncate` (not just `w`): the footer is a fixed 32px bar, so an
